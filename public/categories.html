@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Categories - Damodar Traders</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f9f9f9;
+    }
+
+    nav {
+      height: 90px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      left: 0;
+      justify-content: space-around;
+      background-color: #ffffff;
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    nav>ul {
+      display: flex;
+      align-items: center;
+      font-size: clamp(14px, 1.3vw, 18px);
+      gap: 40px;
+      list-style: none;
+    }
+
+    nav img {
+      width: min(15vw, 200px);
+      margin-top: 10px;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 15px;
+      color: #333;
+    }
+
+    .btn .btn1 {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: clamp(12px, 1vw, 16px);
+      box-shadow: 5px 3px 5px rgba(0, 0, 0, 0.1);
+      margin-right: 10px;
+      transition: transform 0.3s, background-color 0.3s;
+      background-color: #2a5f8a;
+      color: white;
+    }
+
+    .btn1:hover {
+      background-color: #1d4567;
+      transform: scale(1.05);
+    }
+
+    .nav-product {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .nav-product svg {
+      margin-left: 5px;
+      width: 18px;
+      height: 18px;
+      transition: transform 0.3s;
+    }
+
+    .product-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 180px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      padding: 8px 0;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .nav-product:hover .product-dropdown,
+    .product-dropdown:hover {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nav-product:hover svg {
+      transform: rotate(180deg);
+    }
+
+    .product-dropdown a {
+      display: block;
+      padding: 10px 16px;
+      color: #555;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .product-dropdown a:hover {
+      background: #f5f5f5;
+      color: #2a5f8a;
+      padding-left: 20px;
+    }
+
+    .line {
+      border: none;
+      height: 1px;
+      background-color: #eee;
+      margin: 0;
+    }
+
+    .main {
+      padding: 0 5%;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .categories-header {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .categories-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: #222;
+    }
+
+    .categories-header p {
+      color: #666;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Search Bar Styles */
+    .search-container {
+      margin: 30px 0;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .search-bar {
+      position: relative;
+      display: flex;
+      gap: 15px;
+    }
+
+    .search-input-wrapper {
+      flex: 1;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 15px 50px 15px 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 30px;
+      font-size: 1rem;
+      transition: all 0.3s;
+      background: #f9f9f9;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #2a5f8a;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(42, 95, 138, 0.1);
+    }
+
+    .search-button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #2a5f8a;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 10px 15px;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    .search-button:hover {
+      background: #1d4567;
+    }
+
+    .clear-search-button {
+      padding: 12px 25px;
+      background: #f0f0f0;
+      border: 2px solid #e0e0e0;
+      border-radius: 30px;
+      font-size: 1rem;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .clear-search-button:hover {
+      background: #e0e0e0;
+    }
+
+    .search-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      max-height: 350px;
+      overflow-y: auto;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .search-suggestions.show {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+
+    .suggestion-item:hover {
+      background: #f5f5f5;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-name {
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+    }
+
+    .suggestion-category {
+      font-size: 0.85rem;
+      color: #666;
+      background: #f0f0f0;
+      padding: 2px 8px;
+      border-radius: 12px;
+      display: inline-block;
+    }
+
+    .search-results-info {
+      margin: 20px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #2a5f8a;
+    }
+
+    .results-count {
+      font-size: 1.1rem;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .results-count span {
+      color: #2a5f8a;
+      font-weight: 600;
+    }
+
+    .no-search-results {
+      text-align: center;
+      padding: 50px 20px;
+      color: #666;
+    }
+
+    .no-search-results i {
+      font-size: 3rem;
+      color: #ccc;
+      margin-bottom: 20px;
+    }
+
+    .no-search-results h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .no-search-results p {
+      color: #888;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* Quick Filters */
+    .quick-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .quick-filter-btn {
+      padding: 8px 20px;
+      background: #f0f0f0;
+      border: 2px solid #e0e0e0;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .quick-filter-btn:hover {
+      background: #e0e0e0;
+      border-color: #2a5f8a;
+      color: #2a5f8a;
+    }
+
+    .quick-filter-btn.active {
+      background: #2a5f8a;
+      border-color: #2a5f8a;
+      color: white;
+    }
+
+    .category-section {
+      margin: 50px 0;
+    }
+
+    .category-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+
+    .category-title h2 {
+      font-size: 1.8rem;
+      color: #2a5f8a;
+      margin-right: 15px;
+    }
+
+    .category-title .view-all {
+      margin-left: auto;
+      color: #2a5f8a;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    .category-title .view-all i {
+      margin-left: 5px;
+      font-size: 0.8rem;
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-image {
+      height: 200px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f5f7fa;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: transform 0.3s;
+    }
+
+    .product-card:hover .product-image img {
+      transform: scale(1.05);
+    }
+
+    .product-info {
+      padding: 20px;
+    }
+
+    .product-name {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .product-price {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .current-price {
+      font-size: 1.2rem;
+      color: #e63946;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .original-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .discount-badge {
+      background: #e63946;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .product-category {
+      display: inline-block;
+      background: #f0f0f0;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    .view-more-btn {
+      display: block;
+      text-align: center;
+      margin: 40px auto;
+      padding: 12px 30px;
+      background: #2a5f8a;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      max-width: 200px;
+    }
+
+    .view-more-btn:hover {
+      background: #1d4567;
+    }
+
+    .no-products {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .loading-spinner {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #2a5f8a;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Industrial Background Styles */
+.industrial-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  background: #f5f7fa;
+}
+
+.pipe {
+  position: absolute;
+  background: rgba(58, 123, 213, 0.1);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(58, 123, 213, 0.1);
+}
+
+.pipe-connector {
+  position: absolute;
+  background: rgba(58, 123, 213, 0.15);
+  border-radius: 50%;
+}
+
+.particle {
+  position: absolute;
+  background: rgba(58, 123, 213, 0.2);
+  border-radius: 50%;
+}
+
+    @media (max-width: 768px) {
+      nav {
+        flex-direction: column;
+        padding: 15px;
+        height: auto;
+        gap: 15px;
+      }
+
+      nav>ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      nav ul li {
+        margin: 5px 8px;
+      }
+
+      .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+      }
+
+      .categories-header h1 {
+        font-size: 2rem;
+      }
+
+      .category-title h2 {
+        font-size: 1.5rem;
+      }
+
+      .product-dropdown {
+        position: static;
+        box-shadow: none;
+        border-radius: 0;
+        display: none;
+        opacity: 1;
+        transform: none;
+        width: 100%;
+      }
+
+      .nav-product:hover .product-dropdown {
+        display: block;
+      }
+
+      .category-title .view-all {
+        margin-left: 0;
+        margin-top: 10px;
+      }
+
+      .search-bar {
+        flex-direction: column;
+      }
+
+      .clear-search-button {
+        width: 100%;
+        text-align: center;
+      }
+
+      .search-container {
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .products-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .categories-header h1 {
+        font-size: 1.8rem;
+      }
+
+      .search-input {
+        padding: 12px 45px 12px 15px;
+        font-size: 0.95rem;
+      }
+
+      .search-button {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+
+    }
+  </style>
+</head>
+
+<body>
+  <nav>
+    <a href="index.html">
+      <img src="./Create_a_logo_concep-removebg-preview.png" alt="Damodar Traders Logo">
+    </a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-product">
+        <a href="categories.html">Products</a>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M18.2197 8.546L12.2531 14.5126C12.1555 14.6102 11.9972 14.6102 11.8996 14.5126L6.02767 8.64067C5.73477 8.34778 5.2599 8.34778 4.96701 8.64067C4.67411 8.93357 4.67411 9.40844 4.96701 9.70133L10.8389 15.5732C11.5223 16.2566 12.6304 16.2566 13.3138 15.5732L19.2803 9.60666C19.5732 9.31377 19.5732 8.8389 19.2803 8.546C18.9874 8.25311 18.5126 8.25311 18.2197 8.546Z"
+            fill="currentColor"></path>
+        </svg>
+        <div class="product-dropdown">
+          <a href="categories.html">All Categories</a>
+          <a href="categories.html?category=pipes">Pipes</a>
+          <a href="categories.html?category=fittings">Fittings</a>
+          <a href="categories.html?category=valves">Valves</a>
+          <a href="categories.html?category=other">Other Products</a>
+        </div>
+      </li>
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="contact.html">Contact us</a></li>
+    </ul>
+  </nav>
+
+  <hr class="line">
+
+  <!-- Add this right after <hr class="line"> -->
+  <div class="industrial-background">
+    <div class="pipes-container"></div>
+    <div class="particles-container"></div>
+  </div>
+
+  <div class="main">
+    <div class="categories-header">
+      <h1>Our Product Categories</h1>
+      <p>Explore our wide range of high-quality industrial products designed to meet your specific needs.</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-container">
+      <div class="search-bar">
+        <div class="search-input-wrapper">
+          <input type="text" id="searchInput" class="search-input"
+            placeholder="Search products by name, category, or description...">
+          <button class="search-button" id="searchButton">
+            <i class="fas fa-search"></i>
+          </button>
+          <div class="search-suggestions" id="searchSuggestions"></div>
+        </div>
+        <button class="clear-search-button" id="clearSearchButton">
+          Clear Search
+        </button>
+      </div>
+
+      <!-- Quick Filters -->
+      <div class="quick-filters">
+        <button class="quick-filter-btn" data-category="pipes">Pipes</button>
+        <button class="quick-filter-btn" data-category="fittings">Fittings</button>
+        <button class="quick-filter-btn" data-category="valves">Valves</button>
+        <button class="quick-filter-btn" data-category="other">Other</button>
+        <button class="quick-filter-btn" data-discount="true">On Sale</button>
+      </div>
+
+      <!-- Search Results Info -->
+      <div class="search-results-info" id="searchResultsInfo" style="display: none;">
+        <div class="results-count" id="resultsCount"></div>
+      </div>
+    </div>
+
+    <!-- No Search Results -->
+    <div class="no-search-results" id="noSearchResults" style="display: none;">
+      <i class="fas fa-search"></i>
+      <h3>No products found</h3>
+      <p>Try adjusting your search terms or browse our categories</p>
+    </div>
+
+    <!-- Products Sections -->
+    <div class="category-section" id="pipes-section">
+      <div class="category-title">
+        <h2>Pipes</h2>
+        <a href="categories.html?category=pipes" class="view-all">
+          View all pipes <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+      <div class="products-grid" id="pipes-grid">
+        <!-- Pipes will be loaded here -->
+      </div>
+    </div>
+
+    <div class="category-section" id="fittings-section">
+      <div class="category-title">
+        <h2>Fittings</h2>
+        <a href="categories.html?category=fittings" class="view-all">
+          View all fittings <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+      <div class="products-grid" id="fittings-grid">
+        <!-- Fittings will be loaded here -->
+      </div>
+    </div>
+
+    <div class="category-section" id="valves-section">
+      <div class="category-title">
+        <h2>Valves</h2>
+        <a href="categories.html?category=valves" class="view-all">
+          View all valves <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+      <div class="products-grid" id="valves-grid">
+        <!-- Valves will be loaded here -->
+      </div>
+    </div>
+
+    <div class="category-section" id="other-section">
+      <div class="category-title">
+        <h2>Other Products</h2>
+        <a href="categories.html?category=other" class="view-all">
+          View all other products <i class="fas fa-chevron-right"></i>
+        </a>
+      </div>
+      <div class="products-grid" id="other-grid">
+        <!-- Other products will be loaded here -->
+      </div>
+    </div>
+
+    <button class="view-more-btn" id="viewMoreBtn">View More Products</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>
+       
+        document.addEventListener('DOMContentLoaded', function() {
+  // Initialize industrial background
+  createIndustrialBackground();
+  
+  // Make background responsive to window resize
+  window.addEventListener('resize', () => {
+    if (document.querySelector('.pipes-container')) {
+      document.querySelector('.pipes-container').innerHTML = '';
+      document.querySelector('.particles-container').innerHTML = '';
+      createIndustrialBackground();
+    }
+  });
+});
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const API_BASE_URL = 'http://localhost:3000/api';
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get('category');
+      const showAll = urlParams.get('showAll');
+      const searchQuery = urlParams.get('search');
+      const defaultImage = "assets/Screenshot_2025-06-19_201249-removebg-preview.png";
+
+
+
+      // Search state
+      let currentSearchQuery = searchQuery || '';
+      let isSearching = false;
+      let debounceTimer;
+
+      // If a specific category is selected, show only that category
+      if (category) {
+        document.querySelectorAll('.category-section').forEach(section => {
+          if (!section.id.startsWith(category)) {
+            section.style.display = 'none';
+          }
+        });
+        document.getElementById('viewMoreBtn').style.display = 'none';
+        document.querySelector('.categories-header h1').textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Products`;
+      }
+
+      // More comprehensive fallback data
+      const fallbackProducts = [
+        {
+          _id: '1',
+          name: 'PVC Pipe',
+          category: 'pipes',
+          description: 'High-quality PVC pipe for industrial use',
+          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1 inch', price: 150 }, { size: '2 inch', price: 250 }],
+          discount: 0,
+          material: 'PVC'
+        },
+        {
+          _id: '2',
+          name: 'Elbow Fitting',
+          category: 'fittings',
+          description: '90-degree elbow fitting for pipe connections',
+          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1/2 inch', price: 45 }, { size: '3/4 inch', price: 60 }],
+          discount: 0,
+          material: 'Steel'
+        },
+        {
+          _id: '3',
+          name: 'Ball Valve',
+          category: 'valves',
+          description: 'Durable ball valve for fluid control',
+          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1 inch', price: 120 }, { size: '2 inch', price: 200 }],
+          discount: 10,
+          material: 'Brass'
+        },
+        {
+          _id: '4',
+          name: 'Pipe Clamp',
+          category: 'other',
+          description: 'Sturdy pipe clamp for secure installations',
+          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: 'Standard', price: 25 }],
+          discount: 0,
+          material: 'Steel'
+        },
+        {
+          _id: '5',
+          name: 'Copper Pipe',
+          category: 'pipes',
+          description: 'Premium copper pipe for plumbing applications',
+          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1/2 inch', price: 300 }, { size: '1 inch', price: 550 }],
+          discount: 15,
+          material: 'Copper'
+        },
+        {
+          _id: '6',
+          name: 'Tee Fitting',
+          category: 'fittings',
+          description: 'T-shaped fitting for pipe connections',
+          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1/2 inch', price: 35 }, { size: '3/4 inch', price: 50 }],
+          discount: 0,
+          material: 'Stainless Steel'
+        }
+      ];
+
+      // Load products with better error handling
+      async function loadProducts(searchTerm = '', categoryFilter = '') {
+        let products = [];
+
+        try {
+          // Show loading state
+          showLoadingState();
+
+          // Hide no search results message
+          document.getElementById('noSearchResults').style.display = 'none';
+
+          let endpoint = '/products';
+          let params = new URLSearchParams();
+
+          if (searchTerm) {
+            params.append('search', searchTerm);
+          }
+
+          if (categoryFilter) {
+            params.append('category', categoryFilter);
+          }
+
+          if (category) {
+            params.append('category', category);
+          }
+
+          if (params.toString()) {
+            endpoint = `/products/search?${params.toString()}`;
+          }
+
+          const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+          }
+
+          const apiProducts = await response.json();
+
+          if (Array.isArray(apiProducts)) {
+            products = apiProducts;
+            localStorage.setItem('productDetails', JSON.stringify(products));
+          }
+        } catch (error) {
+          console.error('Error loading products:', error);
+          // If no products loaded yet, use fallback
+          if (products.length === 0) {
+            products = filterFallbackProducts(searchTerm, categoryFilter);
+            console.warn('Using fallback product data');
+          }
+        } finally {
+          displayProducts(products);
+
+          // Update search results info
+          if (searchTerm || categoryFilter) {
+            updateSearchResultsInfo(products.length, searchTerm);
+          }
+
+          hideLoadingState();
+        }
+      }
+
+      // Filter fallback products based on search term
+      function filterFallbackProducts(searchTerm, categoryFilter) {
+        if (!searchTerm && !categoryFilter) {
+          return fallbackProducts;
+        }
+
+        const searchTermLower = searchTerm.toLowerCase();
+
+        return fallbackProducts.filter(product => {
+          const matchesSearch = !searchTerm ||
+            product.name.toLowerCase().includes(searchTermLower) ||
+            product.category.toLowerCase().includes(searchTermLower) ||
+            product.description.toLowerCase().includes(searchTermLower) ||
+            product.material.toLowerCase().includes(searchTermLower);
+
+          const matchesCategory = !categoryFilter ||
+            product.category.toLowerCase() === categoryFilter.toLowerCase();
+
+          return matchesSearch && matchesCategory;
+        });
+      }
+
+      function showLoadingState() {
+        // Show loading in all grids
+        document.querySelectorAll('.products-grid').forEach(grid => {
+          if (!grid.querySelector('.loading-spinner')) {
+            const loadingSpinner = document.createElement('div');
+            loadingSpinner.className = 'loading-spinner';
+            loadingSpinner.innerHTML = `
+              <div class="spinner"></div>
+              <p>Loading products...</p>
+            `;
+            grid.innerHTML = '';
+            grid.appendChild(loadingSpinner);
+          }
+        });
+      }
+
+      function hideLoadingState() {
+        // Remove loading spinners
+        document.querySelectorAll('.loading-spinner').forEach(spinner => {
+          spinner.remove();
+        });
+      }
+
+      function displayProducts(products) {
+        if (!products || !Array.isArray(products)) {
+          showErrorMessage('Invalid product data received');
+          return;
+        }
+
+        if (products.length === 0) {
+          if (currentSearchQuery) {
+            // Show no search results message
+            document.getElementById('noSearchResults').style.display = 'block';
+            document.querySelectorAll('.category-section').forEach(section => {
+              section.style.display = 'none';
+            });
+            document.getElementById('viewMoreBtn').style.display = 'none';
+          } else {
+            showErrorMessage('No products available');
+          }
+          return;
+        } else {
+          // Hide no search results message
+          document.getElementById('noSearchResults').style.display = 'none';
+
+          // Show all category sections if not searching
+          if (!currentSearchQuery && !category) {
+            document.querySelectorAll('.category-section').forEach(section => {
+              section.style.display = 'block';
+            });
+            document.getElementById('viewMoreBtn').style.display = 'block';
+          }
+        }
+
+        // Group products by category
+        const productsByCategory = {
+          pipes: [],
+          fittings: [],
+          valves: [],
+          other: []
+        };
+
+        products.forEach(product => {
+          const productCategory = product.category?.toLowerCase() || 'other';
+          if (productsByCategory[productCategory]) {
+            productsByCategory[productCategory].push(product);
+          } else {
+            productsByCategory.other.push(product);
+          }
+        });
+
+        // Display products in their respective sections
+        for (const [cat, categoryProducts] of Object.entries(productsByCategory)) {
+          const gridElement = document.getElementById(`${cat}-grid`);
+          if (!gridElement) continue;
+
+          gridElement.innerHTML = '';
+
+          // Determine how many products to show
+          const productsToShow = (showAll || window.location.search.includes('category') || currentSearchQuery) ?
+            categoryProducts :
+            categoryProducts.slice(0, 4);
+
+          if (productsToShow.length === 0) {
+            gridElement.innerHTML = '<div class="no-products">No products available in this category</div>';
+            continue;
+          }
+
+          productsToShow.forEach(product => {
+            const productCard = createProductCard(product);
+            gridElement.appendChild(productCard);
+          });
+        }
+      }
+
+      function createProductCard(product) {
+        const productCard = document.createElement('a');
+        productCard.href = `product-details.html?id=${product._id}`;
+        productCard.className = 'product-card';
+
+        // Product image
+        const productImage = document.createElement('div');
+        productImage.className = 'product-image';
+        const img = document.createElement('img');
+        img.src = product.image || product.imagePath || defaultImage;
+        img.alt = product.name || 'Product Image';
+        img.loading = "lazy";
+        img.onerror = function () {
+          this.src = defaultImage;
+        };
+        productImage.appendChild(img);
+
+        // Product info
+        const productInfo = document.createElement('div');
+        productInfo.className = 'product-info';
+
+        const productName = document.createElement('h3');
+        productName.className = 'product-name';
+        productName.textContent = product.name || 'Unnamed Product';
+
+        const productPrice = document.createElement('div');
+        productPrice.className = 'product-price';
+
+        // Get the first available price if sizeOptions exist
+        let price = 0;
+        if (product.sizeOptions && product.sizeOptions.length > 0 && product.sizeOptions[0].price) {
+          price = product.sizeOptions[0].price;
+        }
+
+        if (price > 0) {
+          const currentPrice = document.createElement('span');
+          currentPrice.className = 'current-price';
+
+          if (product.discount && product.discount > 0) {
+            const discountedPrice = price * (1 - product.discount / 100);
+            currentPrice.textContent = `₹${discountedPrice.toFixed(2)}`;
+
+            const originalPrice = document.createElement('span');
+            originalPrice.className = 'original-price';
+            originalPrice.textContent = `₹${price.toFixed(2)}`;
+
+            const discountBadge = document.createElement('span');
+            discountBadge.className = 'discount-badge';
+            discountBadge.textContent = `${product.discount}% OFF`;
+
+            productPrice.appendChild(originalPrice);
+            productPrice.appendChild(currentPrice);
+            productPrice.appendChild(discountBadge);
+          } else {
+            currentPrice.textContent = `₹${price.toFixed(2)}`;
+            productPrice.appendChild(currentPrice);
+          }
+        } else {
+          const priceText = document.createElement('span');
+          priceText.textContent = 'Price on request';
+          productPrice.appendChild(priceText);
+        }
+
+        const productCategory = document.createElement('span');
+        productCategory.className = 'product-category';
+        productCategory.textContent = product.category ?
+          product.category.charAt(0).toUpperCase() + product.category.slice(1) :
+          'Other';
+
+        productInfo.appendChild(productName);
+        productInfo.appendChild(productPrice);
+        productInfo.appendChild(productCategory);
+
+        productCard.appendChild(productImage);
+        productCard.appendChild(productInfo);
+
+        return productCard;
+      }
+
+      function showErrorMessage(message) {
+        const header = document.querySelector('.categories-header');
+        if (!header) return;
+
+        const errorElement = document.createElement('p');
+        errorElement.style.textAlign = 'center';
+        errorElement.style.padding = '20px';
+        errorElement.style.color = '#e63946';
+        errorElement.textContent = message;
+
+        header.appendChild(errorElement);
+      }
+
+      function updateSearchResultsInfo(count, searchTerm) {
+        const resultsInfo = document.getElementById('searchResultsInfo');
+        const resultsCount = document.getElementById('resultsCount');
+
+        if (count > 0) {
+          resultsInfo.style.display = 'block';
+          resultsCount.textContent = `Found ${count} product${count !== 1 ? 's' : ''} for "${searchTerm}"`;
+        } else {
+          resultsInfo.style.display = 'none';
+        }
+      }
+
+      // Search functionality
+      function setupSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const clearSearchButton = document.getElementById('clearSearchButton');
+        const searchSuggestions = document.getElementById('searchSuggestions');
+
+        // Set initial search value from URL
+        if (currentSearchQuery) {
+          searchInput.value = currentSearchQuery;
+          document.getElementById('searchResultsInfo').style.display = 'block';
+          document.getElementById('resultsCount').textContent = `Searching for "${currentSearchQuery}"...`;
+        }
+
+        // Search on button click
+        searchButton.addEventListener('click', () => {
+          performSearch();
+        });
+
+        // Search on Enter key
+        searchInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            performSearch();
+          }
+        });
+
+        // Real-time search suggestions
+        searchInput.addEventListener('input', () => {
+          clearTimeout(debounceTimer);
+          const query = searchInput.value.trim();
+
+          if (query.length < 2) {
+            hideSuggestions();
+            return;
+          }
+
+          debounceTimer = setTimeout(async () => {
+            try {
+              const response = await fetch(
+                `${API_BASE_URL}/products/search/suggestions?query=${encodeURIComponent(query)}`
+              );
+
+              if (response.ok) {
+                const suggestions = await response.json();
+                showSuggestions(suggestions, query);
+              }
+            } catch (error) {
+              console.error('Error fetching suggestions:', error);
+            }
+          }, 300);
+        });
+
+        // Clear search
+        clearSearchButton.addEventListener('click', () => {
+          searchInput.value = '';
+          currentSearchQuery = '';
+          hideSuggestions();
+          document.getElementById('searchResultsInfo').style.display = 'none';
+          document.getElementById('noSearchResults').style.display = 'none';
+          document.querySelectorAll('.category-section').forEach(section => {
+            section.style.display = 'block';
+          });
+          document.getElementById('viewMoreBtn').style.display = 'block';
+
+          // Reset quick filter buttons
+          document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+
+          // Update URL
+          updateURL();
+          loadProducts();
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.search-input-wrapper')) {
+            hideSuggestions();
+          }
+        });
+
+        function performSearch() {
+          const query = searchInput.value.trim();
+          currentSearchQuery = query;
+
+          if (query) {
+            loadProducts(query);
+            updateURL();
+            hideSuggestions();
+          } else {
+            // If search is empty, load all products
+            currentSearchQuery = '';
+            document.getElementById('searchResultsInfo').style.display = 'none';
+            document.getElementById('noSearchResults').style.display = 'none';
+            loadProducts();
+            updateURL();
+          }
+        }
+
+        function showSuggestions(suggestions, query) {
+          if (!suggestions || suggestions.length === 0) {
+            hideSuggestions();
+            return;
+          }
+
+          searchSuggestions.innerHTML = '';
+
+          suggestions.forEach(suggestion => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+
+            suggestionItem.innerHTML = `
+              <div class="suggestion-name">${highlightText(suggestion.name, query)}</div>
+              <div class="suggestion-category">${suggestion.category || 'Product'}</div>
+            `;
+
+            suggestionItem.addEventListener('click', () => {
+              searchInput.value = suggestion.name;
+              performSearch();
+            });
+
+            searchSuggestions.appendChild(suggestionItem);
+          });
+
+          searchSuggestions.classList.add('show');
+        }
+
+        function hideSuggestions() {
+          searchSuggestions.classList.remove('show');
+          searchSuggestions.innerHTML = '';
+        }
+
+        function highlightText(text, query) {
+          if (!query) return text;
+
+          const regex = new RegExp(`(${query})`, 'gi');
+          return text.replace(regex, '<mark>$1</mark>');
+        }
+      }
+
+      // Quick filter functionality
+      function setupQuickFilters() {
+        document.querySelectorAll('.quick-filter-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const category = button.getAttribute('data-category');
+            const discount = button.getAttribute('data-discount');
+
+            // Toggle active state
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            if (category) {
+              // Filter by category
+              currentSearchQuery = '';
+              document.getElementById('searchInput').value = '';
+              hideSuggestions();
+              document.getElementById('searchResultsInfo').style.display = 'block';
+              document.getElementById('resultsCount').textContent = `Showing ${category} products`;
+
+              // Show only the selected category section
+              document.querySelectorAll('.category-section').forEach(section => {
+                if (section.id.startsWith(category)) {
+                  section.style.display = 'block';
+                } else {
+                  section.style.display = 'none';
+                }
+              });
+
+              document.getElementById('viewMoreBtn').style.display = 'none';
+              loadProducts('', category);
+            } else if (discount) {
+              // Filter products with discount
+              currentSearchQuery = '';
+              document.getElementById('searchInput').value = '';
+              hideSuggestions();
+              document.getElementById('searchResultsInfo').style.display = 'block';
+              document.getElementById('resultsCount').textContent = 'Showing products on sale';
+
+              // Show all sections
+              document.querySelectorAll('.category-section').forEach(section => {
+                section.style.display = 'block';
+              });
+
+              document.getElementById('viewMoreBtn').style.display = 'none';
+
+              // Filter fallback products with discount
+              const discountedProducts = fallbackProducts.filter(product => product.discount > 0);
+              displayProducts(discountedProducts);
+              updateSearchResultsInfo(discountedProducts.length, 'on sale');
+            }
+          });
+        });
+      }
+
+      function updateURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (currentSearchQuery) {
+          urlParams.set('search', currentSearchQuery);
+        } else {
+          urlParams.delete('search');
+        }
+
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      // View more button functionality
+      document.getElementById('viewMoreBtn').addEventListener('click', function () {
+        window.location.href = 'categories.html?showAll=true';
+      });
+
+      // Initialize
+      setupSearch();
+      setupQuickFilters();
+
+      // Load products with initial search if present
+      if (currentSearchQuery) {
+        loadProducts(currentSearchQuery);
+      } else {
+        loadProducts();
+      }
+    });
+
+    // Industrial Pipe Background Animation (same as index.html)
+function createIndustrialBackground() {
+  const pipesContainer = document.querySelector('.pipes-container');
+  const particlesContainer = document.querySelector('.particles-container');
+  const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
+  
+  // Create horizontal pipes
+  for (let i = 0; i < 8; i++) {
+    const pipe = document.createElement('div');
+    pipe.className = 'pipe';
+    pipesContainer.appendChild(pipe);
+    
+    const isVertical = Math.random() > 0.5;
+    const duration = gsap.utils.random(30, 50);
+    const size = gsap.utils.random(10, 30);
+    const length = gsap.utils.random(200, 400);
+    
+    gsap.set(pipe, {
+      width: isVertical ? `${size}px` : `${length}px`,
+      height: isVertical ? `${length}px` : `${size}px`,
+      background: colors[Math.floor(Math.random() * colors.length)],
+      x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
+      y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
+    });
+    
+    gsap.to(pipe, {
+      x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
+      y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
+      duration: duration,
+      ease: "none",
+      repeat: -1
+    });
+  }
+  
+  // Create pipe connectors
+  for (let i = 0; i < 15; i++) {
+    const connector = document.createElement('div');
+    connector.className = 'pipe-connector';
+    pipesContainer.appendChild(connector);
+    
+    const size = gsap.utils.random(15, 40);
+    
+    gsap.set(connector, {
+      width: `${size}px`,
+      height: `${size}px`,
+      x: gsap.utils.random(0, window.innerWidth),
+      y: gsap.utils.random(0, window.innerHeight),
+      opacity: 0
+    });
+    
+    gsap.to(connector, {
+      opacity: 0.3,
+      duration: gsap.utils.random(3, 6),
+      yoyo: true,
+      repeat: -1,
+      delay: gsap.utils.random(0, 5)
+    });
+  }
+  
+  // Create floating particles (weld sparks)
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particlesContainer.appendChild(particle);
+    
+    const size = gsap.utils.random(2, 6);
+    
+    gsap.set(particle, {
+      width: `${size}px`,
+      height: `${size}px`,
+      x: gsap.utils.random(0, window.innerWidth),
+      y: gsap.utils.random(0, window.innerHeight),
+      opacity: 0
+    });
+    
+    // Spark animation
+    const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
+    tl.to(particle, {
+      opacity: 0.8,
+      duration: 0.3,
+      ease: "power1.out"
+    })
+    .to(particle, {
+      x: "+=50",
+      y: "+=50",
+      duration: 0.8,
+      ease: "power1.inOut"
+    })
+    .to(particle, {
+      opacity: 0,
+      duration: 0.3,
+      ease: "power1.in"
+    });
+  }
+}
+  </script>
+</body>
+
+</html>

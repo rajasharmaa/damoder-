@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account - Damodar Traders</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="style1.css">
+  <style>
+    .account-container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .account-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .account-tabs {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .account-tab {
+      padding: 10px 20px;
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #666;
+    }
+    .account-tab.active {
+      border-bottom-color: #2a5f8a;
+      color: #2a5f8a;
+      font-weight: 500;
+    }
+    .account-content {
+      padding: 20px 0;
+    }
+    .account-details {
+      margin-bottom: 30px;
+    }
+    .account-details h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    .detail-row {
+      display: flex;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+    .detail-label {
+      width: 150px;
+      font-weight: 500;
+    }
+    .detail-value {
+      flex: 1;
+    }
+    .logout-btn {
+      padding: 8px 15px;
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .logout-btn:hover {
+      background: #c0392b;
+    }
+    .edit-btn {
+      padding: 8px 15px;
+      background: #2a5f8a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    .edit-btn:hover {
+      background: #1d4567;
+    }
+    .inquiry-list {
+      margin-top: 20px;
+    }
+    .inquiry-item {
+      border: 1px solid #eee;
+      border-radius: 4px;
+      padding: 15px;
+      margin-bottom: 15px;
+      background: #f9f9f9;
+    }
+    .inquiry-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .inquiry-date {
+      color: #666;
+      font-size: 0.9rem;
+    }
+    .inquiry-subject {
+      font-weight: 500;
+      color: #2a5f8a;
+    }
+    .inquiry-status {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .status-new {
+      background: #ffebee;
+      color: #c62828;
+    }
+    .status-pending {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+    .status-completed {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .no-inquiries {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .edit-form {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html">
+      <img src="./Create_a_logo_concep-removebg-preview.png" alt="Damodar Traders Logo">
+    </a>
+    
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="nav-overlay" id="navOverlay"></div>
+    
+    <ul id="navMenu">
+      <li><a href="index.html">Home</a></li>
+      <li class="nav-product">
+        <a href="categories.html">Product</a>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M18.2197 8.546L12.2531 14.5126C12.1555 14.6102 11.9972 14.6102 11.8996 14.5126L6.02767 8.64067C5.73477 8.34778 5.2599 8.34778 4.96701 8.64067C4.67411 8.93357 4.67411 9.40844 4.96701 9.70133L10.8389 15.5732C11.5223 16.2566 12.6304 16.2566 13.3138 15.5732L19.2803 9.60666C19.5732 9.31377 19.5732 8.8389 19.2803 8.546C18.9874 8.25311 18.5126 8.25311 18.2197 8.546Z"
+            fill="currentColor"></path>
+        </svg>
+        <div class="product-dropdown">
+          <a href="categories.html">All Categories</a>
+          <a href="products.html?category=pipes">Pipes</a>
+          <a href="products.html?category=fittings">Fittings</a>
+          <a href="products.html?category=valves">Valves</a>
+          <a href="products.html?category=other">Other Products</a>
+        </div>
+      </li>
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="contact.html">Contact us</a></li>
+      <li><a href="account.html" id="accountLink">My Account</a></li>
+    </ul>
+    
+    <div class="btn">
+      <button class="btn1" onclick="window.location.href='index.html'">Home</button>
+    </div>
+  </nav>
+
+  <hr class="line">
+
+  <div class="account-container">
+    <div class="account-header">
+      <h2>My Account</h2>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+    
+    <div class="account-tabs">
+      <button class="account-tab active" onclick="showAccountTab('profile')">Profile</button>
+      <button class="account-tab" onclick="showAccountTab('inquiries')">My Inquiries</button>
+    </div>
+    
+    <div class="account-content">
+      <!-- Profile Tab -->
+      <div id="profileTab" class="account-tab-content">
+        <div class="account-details">
+          <h3>Personal Information</h3>
+          <div class="detail-row">
+            <div class="detail-label">Name:</div>
+            <div class="detail-value" id="userName"></div>
+            <button class="edit-btn" onclick="toggleEditForm()">Edit</button>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Email:</div>
+            <div class="detail-value" id="userEmail"></div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Phone:</div>
+            <div class="detail-value" id="userPhone"></div>
+          </div>
+          <div class="detail-row">
+            <div class="detail-label">Account Created:</div>
+            <div class="detail-value" id="userCreated"></div>
+          </div>
+        </div>
+        
+        <!-- Edit Form -->
+        <div id="editForm" class="edit-form">
+          <h3>Edit Profile</h3>
+          <form id="profileForm">
+            <div class="form-group">
+              <label for="editName">Name:</label>
+              <input type="text" id="editName" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="editPhone">Phone:</label>
+              <input type="tel" id="editPhone" name="phone">
+            </div>
+            <div class="form-group">
+              <label for="editPassword">New Password (leave blank to keep current):</label>
+              <input type="password" id="editPassword" name="password">
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="edit-btn">Save Changes</button>
+              <button type="button" class="logout-btn" onclick="toggleEditForm()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <!-- Inquiries Tab -->
+      <div id="inquiriesTab" class="account-tab-content" style="display: none;">
+        <h3>My Inquiries</h3>
+        <div id="inquiriesList" class="inquiry-list">
+          <!-- Inquiries will be loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:3000/api';
+    
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const navOverlay = document.getElementById('navOverlay');
+
+    mobileMenuBtn.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+      navOverlay.classList.toggle('active');
+    });
+
+    navOverlay.addEventListener('click', () => {
+      navMenu.classList.remove('active');
+      navOverlay.classList.remove('active');
+    });
+
+    // Toggle product dropdown on mobile
+    const navProducts = document.querySelectorAll('.nav-product');
+    navProducts.forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          item.classList.toggle('active');
+        }
+      });
+    });
+
+    // Tab switching
+    function showAccountTab(tabName) {
+      // Hide all tabs
+      document.getElementById('profileTab').style.display = 'none';
+      document.getElementById('inquiriesTab').style.display = 'none';
+      
+      // Show selected tab
+      document.getElementById(tabName + 'Tab').style.display = 'block';
+      
+      // Update active tab button
+      document.querySelectorAll('.account-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
+      // Load data for selected tab
+      if (tabName === 'inquiries') {
+        loadUserInquiries();
+      }
+    }
+
+    // Toggle edit form
+    function toggleEditForm() {
+      const editForm = document.getElementById('editForm');
+      editForm.style.display = editForm.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Load user profile
+    async function loadUserProfile() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/status`);
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+          window.location.href = 'login.html?type=user&redirect=account.html';
+          return;
+        }
+        
+        // Display user info
+        document.getElementById('userName').textContent = data.user.name;
+        document.getElementById('userEmail').textContent = data.user.email;
+        document.getElementById('editName').value = data.user.name;
+        
+        // Fetch additional user details
+        const userResponse = await fetch(`${API_BASE_URL}/users/${data.user.id}`, {
+          credentials: 'include'
+        });
+        
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          document.getElementById('userPhone').textContent = userData.phone || 'Not provided';
+          document.getElementById('editPhone').value = userData.phone || '';
+          
+          if (userData.createdAt) {
+            const date = new Date(userData.createdAt);
+            document.getElementById('userCreated').textContent = date.toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Error loading account:', err);
+        window.location.href = 'login.html?type=user&redirect=account.html';
+      }
+    }
+
+    // Load user inquiries
+    async function loadUserInquiries() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/user/inquiries`, {
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to load inquiries');
+        }
+        
+        const inquiries = await response.json();
+        displayUserInquiries(inquiries);
+      } catch (err) {
+        console.error('Error loading inquiries:', err);
+        const inquiriesList = document.getElementById('inquiriesList');
+        inquiriesList.innerHTML = '<div class="no-inquiries">Unable to load inquiries. Please try again later.</div>';
+      }
+    }
+
+    // Display user inquiries
+    function displayUserInquiries(inquiries) {
+      const container = document.getElementById('inquiriesList');
+      
+      if (inquiries.length === 0) {
+        container.innerHTML = '<div class="no-inquiries">You haven\'t submitted any inquiries yet.</div>';
+        return;
+      }
+      
+      container.innerHTML = '';
+      
+      inquiries.forEach(inquiry => {
+        const inquiryItem = document.createElement('div');
+        inquiryItem.className = 'inquiry-item';
+        
+        const date = new Date(inquiry.createdAt).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const statusClass = `status-${inquiry.status}`;
+        const statusText = inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1);
+        
+        inquiryItem.innerHTML = `
+          <div class="inquiry-header">
+            <div>
+              <div class="inquiry-subject">${getSubjectLabel(inquiry.subject)}</div>
+              <div class="inquiry-date">${date}</div>
+            </div>
+            <span class="inquiry-status ${statusClass}">${statusText}</span>
+          </div>
+          <p>${inquiry.message}</p>
+          ${inquiry.reply ? `<div style="margin-top: 10px; padding: 10px; background: #e8f5e9; border-radius: 4px;">
+            <strong>Our Response:</strong> ${inquiry.reply}
+          </div>` : ''}
+        `;
+        
+        container.appendChild(inquiryItem);
+      });
+    }
+
+    // Update profile
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/status`);
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+          window.location.href = 'login.html?type=user&redirect=account.html';
+          return;
+        }
+        
+        const updateData = {
+          name: document.getElementById('editName').value,
+          phone: document.getElementById('editPhone').value
+        };
+        
+        const password = document.getElementById('editPassword').value;
+        if (password) {
+          updateData.password = password;
+        }
+        
+        const updateResponse = await fetch(`${API_BASE_URL}/users/${data.user.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updateData),
+          credentials: 'include'
+        });
+        
+        if (!updateResponse.ok) {
+          throw new Error('Failed to update profile');
+        }
+        
+        alert('Profile updated successfully!');
+        toggleEditForm();
+        loadUserProfile();
+        
+      } catch (err) {
+        console.error('Error updating profile:', err);
+        alert('Error updating profile: ' + err.message);
+      }
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          window.location.href = 'index.html';
+        } else {
+          throw new Error('Logout failed');
+        }
+      } catch (err) {
+        console.error('Logout failed:', err);
+        alert('Logout failed: ' + err.message);
+      }
+    });
+
+    // Helper function to get subject label
+    function getSubjectLabel(subject) {
+      const subjects = {
+        'product_inquiry': 'Product Inquiry',
+        'quote_request': 'Quote Request',
+        'technical_support': 'Technical Support',
+        'general_question': 'General Question',
+        'complaint': 'Complaint',
+        'other': 'Other'
+      };
+      return subjects[subject] || subject;
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', loadUserProfile);
+  </script>
+</body>
+</html>

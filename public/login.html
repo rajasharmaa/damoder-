@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Damodar Traders</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      z-index: 10;
+      position: relative;
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #2a5f8a;
+      box-shadow: 0 0 0 2px rgba(42, 95, 138, 0.2);
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2a5f8a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    button:hover {
+      background: #1d4567;
+    }
+    
+    .error {
+      color: #ff4444;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+    
+    .register-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .register-link a {
+      color: #2a5f8a;
+      text-decoration: none;
+    }
+    
+    .register-link a:hover {
+      text-decoration: underline;
+    }
+    
+    .admin-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+    
+    .admin-link a {
+      color: #666;
+      text-decoration: none;
+    }
+    
+    .admin-link a:hover {
+      text-decoration: underline;
+      color: #2a5f8a;
+    }
+    
+    /* Industrial Background Styles */
+    .industrial-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
+
+    .pipe {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(58, 123, 213, 0.1);
+    }
+
+    .pipe-connector {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.15);
+      border-radius: 50%;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.2);
+      border-radius: 50%;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Industrial Background Container -->
+  <div class="industrial-background">
+    <div class="pipes-container"></div>
+    <div class="particles-container"></div>
+  </div>
+  
+  <div class="login-container">
+    <h1>Customer Login</h1>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email" required autofocus>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      
+      <button type="submit" id="loginBtn">Login</button>
+      <div id="errorMsg" class="error"></div>
+    </form>
+    
+    <div class="register-link">
+      Don't have an account? <a href="register.html">Register here</a>
+    </div>
+    
+    <div class="admin-link">
+      Are you an admin? <a href="admin-login.html">Login here</a>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>
+    const API_BASE_URL = 'http://localhost:3000/api';
+    
+    // Industrial Pipe Background Animation
+    function createIndustrialBackground() {
+      const pipesContainer = document.querySelector('.pipes-container');
+      const particlesContainer = document.querySelector('.particles-container');
+      const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
+      
+      // Create horizontal pipes
+      for (let i = 0; i < 8; i++) {
+        const pipe = document.createElement('div');
+        pipe.className = 'pipe';
+        pipesContainer.appendChild(pipe);
+        
+        const isVertical = Math.random() > 0.5;
+        const duration = gsap.utils.random(30, 50);
+        const size = gsap.utils.random(10, 30);
+        const length = gsap.utils.random(200, 400);
+        
+        gsap.set(pipe, {
+          width: isVertical ? `${size}px` : `${length}px`,
+          height: isVertical ? `${length}px` : `${size}px`,
+          background: colors[Math.floor(Math.random() * colors.length)],
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
+          y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
+        });
+        
+        gsap.to(pipe, {
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
+          y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
+          duration: duration,
+          ease: "none",
+          repeat: -1
+        });
+      }
+      
+      // Create pipe connectors
+      for (let i = 0; i < 15; i++) {
+        const connector = document.createElement('div');
+        connector.className = 'pipe-connector';
+        pipesContainer.appendChild(connector);
+        
+        const size = gsap.utils.random(15, 40);
+        
+        gsap.set(connector, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        gsap.to(connector, {
+          opacity: 0.3,
+          duration: gsap.utils.random(3, 6),
+          yoyo: true,
+          repeat: -1,
+          delay: gsap.utils.random(0, 5)
+        });
+      }
+      
+      // Create floating particles (weld sparks)
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particlesContainer.appendChild(particle);
+        
+        const size = gsap.utils.random(2, 6);
+        
+        gsap.set(particle, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        // Spark animation
+        const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
+        tl.to(particle, {
+          opacity: 0.8,
+          duration: 0.3,
+          ease: "power1.out"
+        })
+        .to(particle, {
+          x: "+=50",
+          y: "+=50",
+          duration: 0.8,
+          ease: "power1.inOut"
+        })
+        .to(particle, {
+          opacity: 0,
+          duration: 0.3,
+          ease: "power1.in"
+        });
+      }
+    }
+    
+    async function checkAuthStatus() {
+      try {
+        // Check if already logged in as user
+        const userResponse = await fetch(`${API_BASE_URL}/auth/status`, {
+          credentials: 'include'
+        });
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          if (userData.authenticated) {
+            window.location.href = 'account.html';
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    }
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const loginBtn = document.getElementById('loginBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = '';
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      
+      // Validation
+      if (!email) {
+        errorMsg.textContent = 'Email is required';
+        document.getElementById('email').focus();
+        return;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        errorMsg.textContent = 'Please enter a valid email address';
+        document.getElementById('email').focus();
+        return;
+      }
+      
+      if (!password) {
+        errorMsg.textContent = 'Password is required';
+        document.getElementById('password').focus();
+        return;
+      }
+      
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = 'Logging in... <span class="loading"></span>';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password }),
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Login failed');
+        }
+        
+        const data = await response.json();
+        
+        // Redirect to account page
+        window.location.href = 'account.html';
+      } catch (error) {
+        console.error('Login error:', error);
+        errorMsg.textContent = error.message;
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      }
+    });
+    
+    // Initialize
+    checkAuthStatus();
+    createIndustrialBackground();
+    
+    // Make background responsive to window resize
+    window.addEventListener('resize', () => {
+      if (document.querySelector('.pipes-container')) {
+        document.querySelector('.pipes-container').innerHTML = '';
+        document.querySelector('.particles-container').innerHTML = '';
+        createIndustrialBackground();
+      }
+    });
+  </script>
+</body>
+</html>

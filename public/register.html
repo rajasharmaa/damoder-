@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Damodar Traders</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .register-container {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      color: #555;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: #2a5f8a;
+      box-shadow: 0 0 0 2px rgba(42, 95, 138, 0.2);
+    }
+    
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2a5f8a;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    button:hover {
+      background: #1d4567;
+    }
+    
+    .error {
+      color: #ff4444;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .success {
+      color: #4CAF50;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+    
+    .login-link {
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .login-link a {
+      color: #2a5f8a;
+      text-decoration: none;
+    }
+    
+    .login-link a:hover {
+      text-decoration: underline;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="register-container">
+    <h1>Create Account</h1>
+    
+    <form id="registerForm">
+      <div class="form-group">
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" required autofocus>
+      </div>
+      
+      <div class="form-group">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="phone">Phone Number (Optional):</label>
+        <input type="tel" id="phone" name="phone">
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required minlength="6">
+      </div>
+      
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" required>
+      </div>
+      
+      <button type="submit" id="registerBtn">Create Account</button>
+      <div id="errorMsg" class="error"></div>
+      <div id="successMsg" class="success"></div>
+    </form>
+    
+    <div class="login-link">
+      Already have an account? <a href="login.html">Login here</a>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:3000/api';
+    
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const registerBtn = document.getElementById('registerBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      const successMsg = document.getElementById('successMsg');
+      errorMsg.textContent = '';
+      successMsg.textContent = '';
+      
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      
+      // Validation
+      if (!name) {
+        errorMsg.textContent = 'Full name is required';
+        document.getElementById('name').focus();
+        return;
+      }
+      
+      if (!email) {
+        errorMsg.textContent = 'Email is required';
+        document.getElementById('email').focus();
+        return;
+      }
+      
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        errorMsg.textContent = 'Please enter a valid email address';
+        document.getElementById('email').focus();
+        return;
+      }
+      
+      if (password.length < 6) {
+        errorMsg.textContent = 'Password must be at least 6 characters long';
+        document.getElementById('password').focus();
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        errorMsg.textContent = 'Passwords do not match';
+        document.getElementById('confirmPassword').focus();
+        return;
+      }
+      
+      registerBtn.disabled = true;
+      registerBtn.innerHTML = 'Creating account... <span class="loading"></span>';
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, email, password, phone }),
+          credentials: 'include'
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Registration failed');
+        }
+        
+        const data = await response.json();
+        successMsg.textContent = 'Account created successfully! Redirecting...';
+        
+        // Redirect to account page after 2 seconds
+        setTimeout(() => {
+          window.location.href = 'account.html';
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Registration error:', error);
+        errorMsg.textContent = error.message;
+      } finally {
+        registerBtn.disabled = false;
+        registerBtn.textContent = 'Create Account';
+      }
+    });
+  </script>
+</body>
+</html>

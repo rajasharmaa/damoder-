@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details - Damodar Traders</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.css">
+  <link rel="stylesheet" href="style1.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #f9f9f9;
+      z-index: -2;
+    }
+
+    /* Industrial Background Styles */
+    .industrial-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
+
+    .pipe {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(58, 123, 213, 0.1);
+    }
+
+    .pipe-connector {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.15);
+      border-radius: 50%;
+    }
+
+    .particle {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.2);
+      border-radius: 50%;
+    }
+    
+    nav {
+      height: 90px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      
+      top: 0;
+      left: 0;
+      justify-content: space-around;
+      background-color: var(--nav-bg);
+      backdrop-filter: blur(10px);
+      z-index: 99;
+    }
+
+    nav > ul {
+      display: flex;
+      align-items: center;
+      font-size: clamp(14px, 1.3vw, 18px);
+      gap: 40px;
+      list-style: none;
+    }
+
+    nav img {
+      width: min(15vw, 200px);
+      margin-top: 10px;
+    }
+
+    /* ===== BUTTONS & LINKS ===== */
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 15px;
+      color: var(--dark-text);
+    }
+
+    .btn .btn1 {
+      padding: 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: clamp(12px, 1vw, 16px);
+      box-shadow: 5px 3px 5px var(--shadow-color);
+      margin-right: 10px;
+      transition: transform 0.3s, background-color 0.3s;
+    }
+
+    .btn1:hover {
+      background-color: rgba(0, 119, 255, 0.311);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      transform: scale(1.1);
+    }
+    
+    .nav-product {
+      display: flex;
+      align-items: center;
+    }
+    
+    .nav-product svg {
+      margin-left: 5px;
+      width: 18px;
+      height: 18px;
+    }
+    
+    .product-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 180px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      border-radius: 5px;
+      padding: 8px 0;
+      z-index: 100;
+    }
+    
+    .nav-product:hover .product-dropdown {
+      display: block;
+    }
+    
+    .product-dropdown a {
+      display: block;
+      padding: 8px 16px;
+      color: #555;
+      font-size: 0.9rem;
+    }
+    
+    .product-dropdown a:hover {
+      background: #f5f5f5;
+      color: #2a5f8a;
+    }
+    
+    .line {
+      border: none;
+      height: 1px;
+      background-color: #eee;
+      margin: 0;
+    }
+    
+    .main {
+      padding: 0 5%;
+    }
+    
+    .product-details {
+      padding: 40px 0;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .product-container {
+      display: flex;
+      gap: 40px;
+      margin-top: 30px;
+    }
+    
+    .product-image {
+      flex: 1;
+      max-width: 500px;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .product-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+    }
+    
+    .product-info {
+      flex: 1;
+    }
+    
+    .product-title {
+      font-size: 2rem;
+      margin-bottom: 15px;
+      color: #222;
+    }
+    
+    .price-container {
+      margin-bottom: 20px;
+    }
+    
+    .current-price {
+      font-size: 1.8rem;
+      color: #e63946;
+      font-weight: bold;
+    }
+    
+    .original-price {
+      text-decoration: line-through;
+      color: #999;
+      font-size: 1.2rem;
+      margin-right: 10px;
+    }
+    
+    .discount-badge {
+      display: inline-block;
+      background: #e63946;
+      color: white;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+    
+    .size-options {
+      margin: 25px 0;
+    }
+    
+    .size-options h3 {
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      color: #444;
+    }
+    
+    .size-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .size-option-btn {
+      padding: 10px 18px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f5f5f5;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+    
+    .size-option-btn:hover {
+      background: #e0e0e0;
+    }
+    
+    .size-option-btn.active {
+      background: #2a5f8a;
+      color: white;
+      border-color: #2a5f8a;
+    }
+    
+    .selected-size {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .price-toggle-container {
+      margin-top: 20px;
+    }
+    
+    .price-toggle-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      background-color: #2a5f8a;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .price-toggle-btn:hover {
+      opacity: 0.9;
+    }
+    
+    .price-toggle-btn i {
+      font-size: 0.9rem;
+    }
+    
+    .product-category {
+      display: inline-block;
+      background: #f0f0f0;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #555;
+    }
+    
+    .product-description {
+      line-height: 1.7;
+      margin-bottom: 30px;
+      font-size: 1.1rem;
+      color: #444;
+    }
+    
+    .back-button {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #2a5f8a;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-top: 20px;
+      transition: background 0.3s;
+      font-size: 1rem;
+    }
+    
+    .back-button:hover {
+      background: #1d4567;
+    }
+    
+    .specifications {
+      margin-top: 40px;
+      background: #f9f9f9;
+      padding: 25px;
+      border-radius: 8px;
+      border: 1px solid #eee;
+    }
+    
+    .specifications h3 {
+      margin-bottom: 20px;
+      font-size: 1.4rem;
+      color: #333;
+    }
+    
+    .specs-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .specs-table tr:nth-child(even) {
+      background: #fff;
+    }
+    
+    .specs-table td {
+      padding: 12px 15px;
+      border: 1px solid #eee;
+    }
+    
+    .specs-table td:first-child {
+      font-weight: bold;
+      width: 30%;
+      background: #f5f5f5;
+      color: #555;
+    }
+    
+    @media (max-width: 768px) {
+      nav {
+       display: none;
+      }
+      
+      nav ul {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      nav ul li {
+        margin: 5px 8px;
+      }
+      
+      .product-container {
+        flex-direction: column;
+      }
+      
+      .product-image {
+        max-width: 100%;
+      }
+      
+      .size-buttons {
+        justify-content: center;
+      }
+      
+      .product-title {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Industrial Background -->
+  <div class="industrial-background">
+    <div class="pipes-container"></div>
+    <div class="particles-container"></div>
+  </div>
+
+  <nav>
+    <a href="index.html">
+      <img src="./Create_a_logo_concep-removebg-preview.png" alt="Damodar Traders Logo">
+    </a>
+    
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="nav-overlay" id="navOverlay"></div>
+    
+    <ul id="navMenu">
+      <li><a href="index.html">Home</a></li>
+
+      <li class="nav-product">
+        <a href="categories.html">Product</a>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M18.2197 8.546L12.2531 14.5126C12.1555 14.6102 11.9972 14.6102 11.8996 14.5126L6.02767 8.64067C5.73477 8.34778 5.2599 8.34778 4.96701 8.64067C4.67411 8.93357 4.67411 9.40844 4.96701 9.70133L10.8389 15.5732C11.5223 16.2566 12.6304 16.2566 13.3138 15.5732L19.2803 9.60666C19.5732 9.31377 19.5732 8.8389 19.2803 8.546C18.9874 8.25311 18.5126 8.25311 18.2197 8.546Z"
+            fill="currentColor"></path>
+        </svg>
+
+        <div class="product-dropdown">
+          <a href="categories.html">All Categories</a>
+          <a href="products.html?category=pipes">Pipes</a>
+          <a href="products.html?category=fittings">Fittings</a>
+          <a href="products.html?category=valves">Valves</a>
+          <a href="products.html?category=other">Other Products</a>
+        </div>
+      </li>
+
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="contact.html">Contact us</a></li>
+      
+      
+    </ul>
+</nav>
+   
+  <hr class="line">
+
+  <div class="main">
+    <div class="product-details">
+      <div class="product-container">
+        <div class="product-image">
+          <img id="detailImage" src="" alt="Product Image">
+        </div>
+        
+        <div class="product-info">
+          <h1 class="product-title" id="productTitle">Product Name</h1>
+          
+          <div class="price-container" id="priceContainer">
+            <!-- Price will be inserted here by JavaScript -->
+          </div>
+          
+          <div class="size-options" id="sizeOptions">
+            <!-- Size options will be inserted here by JavaScript -->
+          </div>
+          
+          <div class="price-toggle-container" id="priceToggleContainer">
+            <!-- Toggle button will be inserted here by JavaScript -->
+          </div>
+          
+          <span class="product-category" id="productCategory">Category</span>
+          
+          <div class="product-description" id="productDescription">
+            Product description goes here...
+          </div>
+          
+          <div class="specifications">
+            <h3>Product Specifications</h3>
+            <table class="specs-table">
+              <tr>
+                <td>Material</td>
+                <td id="specMaterial">Not specified</td>
+              </tr>
+              <tr>
+                <td>Size Range</td>
+                <td id="specSize">Not specified</td>
+              </tr>
+              <tr>
+                <td>Pressure Rating</td>
+                <td id="specPressure">Not specified</td>
+              </tr>
+              <tr>
+                <td>Temperature Range</td>
+                <td id="specTemp">Not specified</td>
+              </tr>
+              <tr>
+                <td>Standards</td>
+                <td id="specStandards">Not specified</td>
+              </tr>
+              <tr>
+                <td>Application</td>
+                <td id="specApplication">Not specified</td>
+              </tr>
+            </table>
+          </div>
+          
+          <a href="categories.html" class="back-button">← Back to Products</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const API_BASE_URL = 'http://localhost:3000/api';
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+      
+      if (!productId) {
+        window.location.href = 'categories.html';
+        return;
+      }
+
+      let showDiscounted = true;
+      let currentProduct = null;
+      
+      // Load product data
+      async function loadProductDetails() {
+        try {
+          const response = await fetch(`${API_BASE_URL}/products/${productId}`);
+          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+          
+          currentProduct = await response.json();
+          displayProductDetails(currentProduct);
+          
+          // Update local storage as fallback
+          const productDetails = JSON.parse(localStorage.getItem('productDetails') || '{}');
+          productDetails[productId] = currentProduct;
+          localStorage.setItem('productDetails', JSON.stringify(productDetails));
+        } catch (error) {
+          console.error('Error fetching product:', error);
+          // Fallback to local storage
+          const productDetails = JSON.parse(localStorage.getItem('productDetails') || '{}');
+          currentProduct = productDetails[productId];
+          
+          if (currentProduct) {
+            displayProductDetails(currentProduct);
+          } else {
+            window.location.href = 'categories.html';
+          }
+        }
+      }
+
+      function displayProductDetails(product) {
+        // Basic product info
+        document.getElementById('detailImage').src = product.image || '';
+        document.getElementById('productTitle').textContent = product.name || 'Product';
+        
+        const category = product.category || 'General';
+        const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1);
+        document.getElementById('productCategory').textContent = formattedCategory;
+        
+        document.getElementById('productDescription').textContent = 
+          product.description || 'No description available.';
+
+        // Specifications
+        document.getElementById('specMaterial').textContent = product.material || 'Not specified';
+        document.getElementById('specPressure').textContent = product.pressureRating || 'Not specified';
+        document.getElementById('specTemp').textContent = product.temperatureRange || 'Not specified';
+        document.getElementById('specStandards').textContent = product.standards || 'Not specified';
+        document.getElementById('specApplication').textContent = product.application || 'Not specified';
+
+        // Size options and pricing
+        const sizeOptions = Array.isArray(product.sizeOptions) ? product.sizeOptions : [];
+        const sizeRange = sizeOptions.filter(opt => opt && opt.size).map(opt => opt.size).join(', ');
+        document.getElementById('specSize').textContent = sizeRange || 'Not specified';
+        
+        setupSizeOptions(sizeOptions, product.discount || 0);
+        setupBackButton(product.category);
+      }
+
+      function setupSizeOptions(sizeOptions, discount) {
+        const sizeOptionsContainer = document.getElementById('sizeOptions');
+        sizeOptionsContainer.innerHTML = '';
+        
+        if (sizeOptions.length > 0) {
+          sizeOptionsContainer.innerHTML = '<h3>Available Sizes:</h3><div class="size-buttons" id="sizeButtons"></div>';
+          const sizeButtonsContainer = document.getElementById('sizeButtons');
+          
+          sizeOptions.forEach((option, index) => {
+            if (option && option.size) {
+              const button = document.createElement('button');
+              button.className = 'size-option-btn';
+              button.textContent = option.size;
+              button.dataset.index = index;
+              button.addEventListener('click', function() {
+                document.querySelectorAll('.size-option-btn').forEach(btn => {
+                  btn.classList.remove('active');
+                });
+                this.classList.add('active');
+                updatePriceDisplay(index, showDiscounted, sizeOptions, discount);
+              });
+              sizeButtonsContainer.appendChild(button);
+            }
+          });
+          
+          // Add price toggle button if there's a discount
+          if (discount > 0) {
+            const priceToggleContainer = document.getElementById('priceToggleContainer');
+            priceToggleContainer.innerHTML = `
+              <button id="priceToggleBtn" class="price-toggle-btn">
+                <i class="fas fa-tag"></i>
+                <span>${showDiscounted ? 'Show Original Price' : 'Show Discounted Price'}</span>
+              </button>
+            `;
+          }
+          
+          // Activate first size option if available
+          const firstSizeBtn = sizeButtonsContainer.querySelector('.size-option-btn');
+          if (firstSizeBtn) {
+            firstSizeBtn.classList.add('active');
+            updatePriceDisplay(0, showDiscounted, sizeOptions, discount);
+          }
+        } else {
+          sizeOptionsContainer.innerHTML = '<p>No size options available</p>';
+          updatePriceDisplay(-1, showDiscounted, [], 0);
+        }
+      }
+
+      function updatePriceDisplay(sizeIndex, showDiscounted, sizeOptions, discount) {
+        const priceContainer = document.getElementById('priceContainer');
+        
+        // If no size options are available
+        if (!sizeOptions || sizeOptions.length === 0 || sizeIndex === -1) {
+          priceContainer.innerHTML = '<div class="current-price">Price not available</div>';
+          return;
+        }
+
+        const option = sizeOptions[sizeIndex] || {};
+        const originalPrice = parseFloat(option.price) || 0;
+        const discountedPrice = originalPrice * (1 - (discount/100));
+        const sizeText = option.size ? `For size: ${option.size}` : '';
+
+        if (originalPrice <= 0) {
+          priceContainer.innerHTML = `
+            <div class="current-price">Price not available</div>
+            ${sizeText ? `<div class="selected-size">${sizeText}</div>` : ''}
+          `;
+          return;
+        }
+
+        if (discount > 0 && showDiscounted) {
+          priceContainer.innerHTML = `
+            <div class="current-price">₹${discountedPrice.toFixed(2)}</div>
+            <div class="original-price">₹${originalPrice.toFixed(2)}</div>
+            <div class="discount-badge">${discount}% OFF</div>
+            ${sizeText ? `<div class="selected-size">${sizeText}</div>` : ''}
+          `;
+        } else {
+          priceContainer.innerHTML = `
+            <div class="current-price">₹${originalPrice.toFixed(2)}</div>
+            ${sizeText ? `<div class="selected-size">${sizeText}</div>` : ''}
+          `;
+        }
+      }
+
+      function setupBackButton(category) {
+        const backButton = document.querySelector('.back-button');
+        if (category) {
+          // Get the referring page's category filter if it exists
+          const referrer = document.referrer;
+          if (referrer && referrer.includes('categories.html')) {
+            const referrerUrl = new URL(referrer);
+            const referrerCategory = referrerUrl.searchParams.get('category');
+            if (referrerCategory) {
+              backButton.href = `categories.html?category=${referrerCategory}`;
+              return;
+            }
+          }
+          // Fallback to the product's category
+          backButton.href = `categories.html?category=${category}`;
+        } else {
+          backButton.href = 'categories.html';
+        }
+      }
+
+      // Initialize price toggle button
+      document.addEventListener('click', function(e) {
+        if (e.target && (e.target.id === 'priceToggleBtn' || e.target.closest('#priceToggleBtn'))) {
+          showDiscounted = !showDiscounted;
+          const btn = e.target.closest('#priceToggleBtn');
+          if (btn) {
+            btn.querySelector('span').textContent = showDiscounted ? 'Show Original Price' : 'Show Discounted Price';
+          }
+          
+          const activeSizeBtn = document.querySelector('.size-option-btn.active');
+          if (activeSizeBtn && currentProduct) {
+            const sizeIndex = parseInt(activeSizeBtn.dataset.index);
+            const sizeOptions = currentProduct.sizeOptions || [];
+            const discount = currentProduct.discount || 0;
+            updatePriceDisplay(sizeIndex, showDiscounted, sizeOptions, discount);
+          }
+        }
+      });
+
+      // Load product details
+      loadProductDetails();
+    });
+
+    // Industrial Pipe Background Animation (same as index.html)
+    function createIndustrialBackground() {
+      const pipesContainer = document.querySelector('.pipes-container');
+      const particlesContainer = document.querySelector('.particles-container');
+      const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
+      
+      // Create horizontal pipes
+      for (let i = 0; i < 8; i++) {
+        const pipe = document.createElement('div');
+        pipe.className = 'pipe';
+        pipesContainer.appendChild(pipe);
+        
+        const isVertical = Math.random() > 0.5;
+        const duration = gsap.utils.random(30, 50);
+        const size = gsap.utils.random(10, 30);
+        const length = gsap.utils.random(200, 400);
+        
+        gsap.set(pipe, {
+          width: isVertical ? `${size}px` : `${length}px`,
+          height: isVertical ? `${length}px` : `${size}px`,
+          background: colors[Math.floor(Math.random() * colors.length)],
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
+          y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
+        });
+        
+        gsap.to(pipe, {
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
+          y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
+          duration: duration,
+          ease: "none",
+          repeat: -1
+        });
+      }
+      
+      // Create pipe connectors
+      for (let i = 0; i < 15; i++) {
+        const connector = document.createElement('div');
+        connector.className = 'pipe-connector';
+        pipesContainer.appendChild(connector);
+        
+        const size = gsap.utils.random(15, 40);
+        
+        gsap.set(connector, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        gsap.to(connector, {
+          opacity: 0.3,
+          duration: gsap.utils.random(3, 6),
+          yoyo: true,
+          repeat: -1,
+          delay: gsap.utils.random(0, 5)
+        });
+      }
+      
+      // Create floating particles (weld sparks)
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particlesContainer.appendChild(particle);
+        
+        const size = gsap.utils.random(2, 6);
+        
+        gsap.set(particle, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        // Spark animation
+        const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
+        tl.to(particle, {
+          opacity: 0.8,
+          duration: 0.3,
+          ease: "power1.out"
+        })
+        .to(particle, {
+          x: "+=50",
+          y: "+=50",
+          duration: 0.8,
+          ease: "power1.inOut"
+        })
+        .to(particle, {
+          opacity: 0,
+          duration: 0.3,
+          ease: "power1.in"
+        });
+      }
+    }
+
+    // Initialize when DOM is loaded
+    document.addEventListener("DOMContentLoaded", () => {
+      createIndustrialBackground();
+      
+      // Make background responsive to window resize
+      window.addEventListener('resize', () => {
+        document.querySelector('.pipes-container').innerHTML = '';
+        document.querySelector('.particles-container').innerHTML = '';
+        createIndustrialBackground();
+      });
+    });
+  </script>
+</body>
+</html>

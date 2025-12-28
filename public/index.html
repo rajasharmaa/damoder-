@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <title>Damodar Traders - Home</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.css">
+  <link rel="stylesheet" href="style1.css">
+
+  <!-- Add these GSAP scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="InertiaPlugin.min.js"></script>
+</head>
+
+<body>
+  <nav>
+    <a href="index.html">
+      <img src="./Create_a_logo_concep-removebg-preview.png" alt="Damodar Traders Logo">
+    </a>
+    
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <div class="nav-overlay" id="navOverlay"></div>
+    
+    <ul id="navMenu">
+      <li><a href="index.html">Home</a></li>
+
+      <li class="nav-product">
+        <a href="categories.html">Product</a>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M18.2197 8.546L12.2531 14.5126C12.1555 14.6102 11.9972 14.6102 11.8996 14.5126L6.02767 8.64067C5.73477 8.34778 5.2599 8.34778 4.96701 8.64067C4.67411 8.93357 4.67411 9.40844 4.96701 9.70133L10.8389 15.5732C11.5223 16.2566 12.6304 16.2566 13.3138 15.5732L19.2803 9.60666C19.5732 9.31377 19.5732 8.8389 19.2803 8.546C18.9874 8.25311 18.5126 8.25311 18.2197 8.546Z"
+            fill="currentColor"></path>
+        </svg>
+
+        <div class="product-dropdown">
+          <a href="categories.html">All Categories</a>
+          <a href="products.html?category=pipes">Pipes</a>
+          <a href="products.html?category=fittings">Fittings</a>
+          <a href="products.html?category=valves">Valves</a>
+          <a href="products.html?category=other">Other Products</a>
+        </div>
+      </li>
+
+      <li><a href="about.html">About Us</a></li>
+      <li><a href="contact.html">Contact us</a></li>
+    </ul>
+
+    <div class="btn">
+      <button class="btn1" id="authButton">Log in</button>
+      <button class="btn1" id="registerButton" style="display: none;">Register</button>
+    </div>
+  </nav>
+
+  <hr class="line">
+  
+  <div class="main">
+    <div class="industrial-background">
+      <div class="pipes-container"></div>
+      <div class="particles-container"></div>
+    </div>
+
+    <div id="page1">
+      <h1 id="head">DAMODAR TRADERS</h1>
+      <h2 id="head1">C.I & G.I Pipe Fitting</h2>
+      <p class="pera1">Established in year 2011, Damodar Traders has made a well-recognized name as a manufacturer of Foot Valves, Pipe Fittings and more. We have achieved expertise in catering to the requirements of our clients exactly as per their needs. We emphasize on stringent quality standards in order to ensure that the products provided to our clients is always optimum to its level.</p>
+      <p class="pera1">Over the years of our operation, we have registered consistent growth rate under the insightful guidance of our mentor Damodar Prasad Sharma (Owner).</p>
+    </div>
+
+    <!-- Shop Photos Slider Section -->
+    <div class="shop-slider-section">
+      <h2>Our Shop & Facilities</h2>
+      <div class="shop-slider-container">
+        <div class="shop-slider" id="shopSlider">
+          <!-- Slides will be added dynamically -->
+        </div>
+        
+        <div class="slider-controls">
+          <button class="slider-btn prev-btn" aria-label="Previous slide">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button class="slider-btn next-btn" aria-label="Next slide">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        
+        <div class="slider-dots" id="sliderDots">
+          <!-- Dots will be added dynamically -->
+        </div>
+        
+        <div class="autoplay-control" id="autoplayControl">
+          <i class="fas fa-pause"></i>
+          <span>Pause</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="page2">
+      <section class="mwg_effect000">
+        <div class="header">
+          <div></div>
+          <div>Our Products</div>
+          <div></div>
+        </div>
+
+        <div class="medias" id="mediaContainer">
+          <!-- Products will be loaded here -->
+        </div>
+      </section>
+    </div>
+
+    <hr class="line">
+
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-row">
+          <div class="footer-col">
+            <img src="./Create_a_logo_concep-removebg-preview.png" alt="Damodar Traders Logo" class="footer-logo">
+            <p class="footer-about">Established in 2011, Damodar Traders is a leading manufacturer of high-quality pipe fittings and valves, serving industrial and commercial clients nationwide.</p>
+          </div>
+
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="categories.html">Products</a></li>
+              <li><a href="about.html">About Us</a></li>
+              <li><a href="contact.html">Contact</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Products</h4>
+            <ul>
+              <li><a href="products.html?category=pipes">Pipes</a></li>
+              <li><a href="products.html?category=fittings">Fittings</a></li>
+              <li><a href="products.html?category=valves">Valves</a></li>
+              <li><a href="products.html?category=other">Other Products</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-col">
+            <h4>Contact Us</h4>
+            <ul class="contact-info">
+              <li><i class="fas fa-map-marker-alt"></i> 1st floor, 37 Ellora plaza, 3, Maharani Rd, Indore, Madhya Pradesh 452007</li>
+              <li><i class="fas fa-phone"></i> +91 9876543210</li>
+              <li><i class="fas fa-envelope"></i> info@damodartraders.com</li>
+              <li><i class="fas fa-clock"></i> Mon-Fri: 9AM-6PM</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+          <p>&copy; 2023 Damodar Traders. All Rights Reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
+  <script src="script.js"></script>
+  <script src="add.js"></script>
+
+  <script>
+    const API_BASE_URL = 'http://localhost:3000/api';
+    
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const navOverlay = document.getElementById('navOverlay');
+
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      navMenu.classList.toggle('active');
+      navOverlay.classList.toggle('active');
+    });
+
+    navOverlay.addEventListener('click', () => {
+      navMenu.classList.remove('active');
+      navOverlay.classList.remove('active');
+      // Close dropdowns
+      document.querySelectorAll('.nav-product').forEach(item => {
+        item.classList.remove('active');
+      });
+    });
+
+    // Toggle product dropdown on mobile
+    const navProducts = document.querySelectorAll('.nav-product');
+    navProducts.forEach(item => {
+      const link = item.querySelector('a');
+      const svg = item.querySelector('svg');
+      
+      link.addEventListener('click', (e) => {
+        if (window.innerWidth <= 860) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          // Close other open dropdowns
+          navProducts.forEach(otherItem => {
+            if (otherItem !== item && otherItem.classList.contains('active')) {
+              otherItem.classList.remove('active');
+            }
+          });
+          
+          // Toggle current dropdown
+          item.classList.toggle('active');
+        }
+      });
+      
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 860 && !item.contains(e.target)) {
+          item.classList.remove('active');
+        }
+      });
+    });
+
+    // Close mobile menu when clicking on a link
+    document.querySelectorAll('#navMenu a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (window.innerWidth <= 860) {
+          // Only close if it's not a dropdown toggle
+          if (!e.target.closest('.nav-product > a')) {
+            navMenu.classList.remove('active');
+            navOverlay.classList.remove('active');
+          }
+        }
+      });
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        navMenu.classList.remove('active');
+        navOverlay.classList.remove('active');
+        navProducts.forEach(item => {
+          item.classList.remove('active');
+        });
+      }
+    });
+
+    // Check user authentication status
+    async function checkAuthStatus() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/status`);
+        const data = await response.json();
+        
+        const authButton = document.getElementById('authButton');
+        const registerButton = document.getElementById('registerButton');
+        
+        if (data.authenticated) {
+          authButton.textContent = 'My Account';
+          authButton.onclick = () => window.location.href = 'account.html';
+          registerButton.style.display = 'none';
+        } else {
+          authButton.textContent = 'Log in';
+          authButton.onclick = () => window.location.href = 'login.html?type=user';
+          registerButton.style.display = 'inline-block';
+          registerButton.onclick = () => window.location.href = 'register.html';
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        // Default to login if check fails
+        const authButton = document.getElementById('authButton');
+        authButton.textContent = 'Log in';
+        authButton.onclick = () => window.location.href = 'login.html?type=user';
+        
+        const registerButton = document.getElementById('registerButton');
+        registerButton.style.display = 'inline-block';
+        registerButton.onclick = () => window.location.href = 'register.html';
+      }
+    }
+    
+    // Shop Slider Functionality
+    class ShopSlider {
+      constructor() {
+        this.slider = document.getElementById('shopSlider');
+        this.dotsContainer = document.getElementById('sliderDots');
+        this.prevBtn = document.querySelector('.prev-btn');
+        this.nextBtn = document.querySelector('.next-btn');
+        this.autoplayControl = document.getElementById('autoplayControl');
+        
+        // Sample shop photos - Replace these with actual shop photos
+        this.slides = [
+          {
+            image: 'https://lh3.googleusercontent.com/gps-cs-s/AG0ilSx7noH_R8FKn-6BHN-iO0m8PBEMWdmhMlKaWoR_ndFtN3uqXccmdUlbIxx-x0jLgMv5y_9aqTcr0ria0OhqbRQci8H5BBE6W9VzjoSQR8eFXiDHmVBVlcaPxZCYJdMU2k-0WA5X=s1360-w1360-h1020-rw',
+            caption: 'Quality Pipe Inventory'
+          },
+          {
+            image: 'https://lh3.googleusercontent.com/gps-cs-s/AG0ilSw0CfeXvofv3-pBeFdOpwmH0D-8hXLPvZYlXzdcRZMKsbZS_gLeA2NWSwniqWA489WL5JoKWaPPKEJEuz95DE16WQXQzkyYOAMP18JGSBIe-8xWJofdyF7mxtxuaiuWMHDcUl58=s1360-w1360-h1020-rw',
+            caption: 'Manufacturing Facility'
+          },
+          {
+            image: 'https://lh3.googleusercontent.com/gps-cs-s/AG0ilSzIci_4M7plTt0DBsBxvfTi-jx9lNp8Vy735nzbeXk09Tizzd1P4DGM4xsR-IUuSRRefGpfw5kytlSfIQ99dZtUARKiJ9gBGPX6vLHg1jo_BpnD_uf_uXMnU88pXnPDZNYyKlsO=s1360-w1360-h1020-rw',
+            caption: 'Professional Team'
+          },
+          {
+            image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+            caption: 'Product Display Area'
+          }
+        ];
+        
+        this.currentSlide = 0;
+        this.totalSlides = this.slides.length;
+        this.autoplayInterval = null;
+        this.autoplaySpeed = 4000; // 4 seconds
+        this.isAutoplay = true;
+        
+        this.init();
+      }
+      
+      init() {
+        this.createSlides();
+        this.createDots();
+        this.setupEventListeners();
+        this.startAutoplay();
+        this.updateSlider();
+      }
+      
+      createSlides() {
+        this.slides.forEach((slide, index) => {
+          const slideElement = document.createElement('div');
+          slideElement.className = 'shop-slide';
+          slideElement.innerHTML = `
+            <img src="${slide.image}" alt="Shop Photo ${index + 1}" loading="lazy">
+            <div class="slide-caption">${slide.caption}</div>
+          `;
+          this.slider.appendChild(slideElement);
+        });
+      }
+      
+      createDots() {
+        for (let i = 0; i < this.totalSlides; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'dot';
+          dot.dataset.index = i;
+          dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+          if (i === 0) dot.classList.add('active');
+          this.dotsContainer.appendChild(dot);
+        }
+      }
+      
+      setupEventListeners() {
+        // Previous button
+        this.prevBtn.addEventListener('click', () => {
+          this.prevSlide();
+          this.resetAutoplay();
+        });
+        
+        // Next button
+        this.nextBtn.addEventListener('click', () => {
+          this.nextSlide();
+          this.resetAutoplay();
+        });
+        
+        // Dot navigation
+        this.dotsContainer.addEventListener('click', (e) => {
+          if (e.target.classList.contains('dot')) {
+            const index = parseInt(e.target.dataset.index);
+            this.goToSlide(index);
+            this.resetAutoplay();
+          }
+        });
+        
+        // Autoplay control
+        this.autoplayControl.addEventListener('click', () => {
+          this.toggleAutoplay();
+        });
+        
+        // Touch swipe support for mobile
+        let startX = 0;
+        let endX = 0;
+        
+        this.slider.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+          this.pauseAutoplay();
+        });
+        
+        this.slider.addEventListener('touchmove', (e) => {
+          endX = e.touches[0].clientX;
+        });
+        
+        this.slider.addEventListener('touchend', () => {
+          const threshold = 50;
+          if (startX - endX > threshold) {
+            this.nextSlide();
+          } else if (endX - startX > threshold) {
+            this.prevSlide();
+          }
+          this.resetAutoplay();
+        });
+      }
+      
+      nextSlide() {
+        this.currentSlide = (this.currentSlide + 1) % this.totalSlides;
+        this.updateSlider();
+      }
+      
+      prevSlide() {
+        this.currentSlide = (this.currentSlide - 1 + this.totalSlides) % this.totalSlides;
+        this.updateSlider();
+      }
+      
+      goToSlide(index) {
+        this.currentSlide = index;
+        this.updateSlider();
+      }
+      
+      updateSlider() {
+        // Move slider
+        this.slider.style.transform = `translateX(-${this.currentSlide * 100}%)`;
+        
+        // Update dots
+        const dots = document.querySelectorAll('.dot');
+        dots.forEach((dot, index) => {
+          dot.classList.toggle('active', index === this.currentSlide);
+        });
+      }
+      
+      startAutoplay() {
+        if (this.autoplayInterval) clearInterval(this.autoplayInterval);
+        this.autoplayInterval = setInterval(() => {
+          this.nextSlide();
+        }, this.autoplaySpeed);
+        
+        this.autoplayControl.innerHTML = '<i class="fas fa-pause"></i><span>Pause</span>';
+        this.autoplayControl.setAttribute('aria-label', 'Pause slideshow');
+        this.isAutoplay = true;
+      }
+      
+      pauseAutoplay() {
+        if (this.autoplayInterval) {
+          clearInterval(this.autoplayInterval);
+          this.autoplayInterval = null;
+        }
+      }
+      
+      resetAutoplay() {
+        this.pauseAutoplay();
+        if (this.isAutoplay) {
+          this.startAutoplay();
+        }
+      }
+      
+      toggleAutoplay() {
+        if (this.isAutoplay) {
+          this.pauseAutoplay();
+          this.autoplayControl.innerHTML = '<i class="fas fa-play"></i><span>Play</span>';
+          this.autoplayControl.setAttribute('aria-label', 'Play slideshow');
+          this.isAutoplay = false;
+        } else {
+          this.startAutoplay();
+        }
+      }
+    }
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuthStatus();
+      // Initialize shop slider
+      new ShopSlider();
+      
+      // Prevent zoom on double tap for mobile
+      let lastTouchEnd = 0;
+      document.addEventListener('touchend', (event) => {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+    });
+  </script>
+</body>
+</html>
