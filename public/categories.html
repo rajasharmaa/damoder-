@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Categories - Damodar Traders</title>
-  <link rel="stylesheet" href="style1.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.css">
   <style>
@@ -22,7 +21,137 @@
       background-color: #f9f9f9;
     }
 
-   
+    nav {
+      height: 90px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      left: 0;
+      justify-content: space-around;
+      background-color: #ffffff;
+      backdrop-filter: blur(10px);
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    nav>ul {
+      display: flex;
+      align-items: center;
+      font-size: clamp(14px, 1.3vw, 18px);
+      gap: 40px;
+      list-style: none;
+    }
+
+    nav img {
+      width: min(15vw, 200px);
+      margin-top: 10px;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      padding: 15px;
+      color: #333;
+    }
+
+    .btn .btn1 {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: clamp(12px, 1vw, 16px);
+      box-shadow: 5px 3px 5px rgba(0, 0, 0, 0.1);
+      margin-right: 10px;
+      transition: transform 0.3s, background-color 0.3s;
+      background-color: #2a5f8a;
+      color: white;
+    }
+
+    .btn1:hover {
+      background-color: #1d4567;
+      transform: scale(1.05);
+    }
+
+    .nav-product {
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .nav-product svg {
+      margin-left: 5px;
+      width: 18px;
+      height: 18px;
+      transition: transform 0.3s;
+    }
+
+    .product-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: white;
+      min-width: 180px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      padding: 8px 0;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .nav-product:hover .product-dropdown,
+    .product-dropdown:hover {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .nav-product:hover svg {
+      transform: rotate(180deg);
+    }
+
+    .product-dropdown a {
+      display: block;
+      padding: 10px 16px;
+      color: #555;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .product-dropdown a:hover {
+      background: #f5f5f5;
+      color: #2a5f8a;
+      padding-left: 20px;
+    }
+
+    /* Mobile menu button styles */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #333;
+      cursor: pointer;
+      padding: 10px;
+      z-index: 1001;
+    }
+
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 998;
+    }
+
     .line {
       border: none;
       height: 1px;
@@ -249,9 +378,9 @@
     }
 
     .quick-filter-btn.active {
-      background: #2a5f8a;
-      border-color: #2a5f8a;
-      color: white;
+      background: #2a5f8a !important;
+      border-color: #2a5f8a !important;
+      color: white !important;
     }
 
     .category-section {
@@ -300,6 +429,9 @@
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
     .product-card:hover {
@@ -431,38 +563,118 @@
     }
 
     /* Industrial Background Styles */
-.industrial-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-  background: #f5f7fa;
-}
+    .industrial-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
 
-.pipe {
-  position: absolute;
-  background: rgba(58, 123, 213, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(58, 123, 213, 0.1);
-}
+    .pipe {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(58, 123, 213, 0.1);
+    }
 
-.pipe-connector {
-  position: absolute;
-  background: rgba(58, 123, 213, 0.15);
-  border-radius: 50%;
-}
+    .pipe-connector {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.15);
+      border-radius: 50%;
+    }
 
-.particle {
-  position: absolute;
-  background: rgba(58, 123, 213, 0.2);
-  border-radius: 50%;
-}
+    .particle {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.2);
+      border-radius: 50%;
+    }
 
+    /* Mobile menu styles */
     @media (max-width: 768px) {
-    
+      .mobile-menu-btn {
+        display: block;
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      
+      nav {
+        position: relative;
+        padding: 15px 20px;
+        justify-content: space-between;
+      }
+      
+      nav > ul {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 280px;
+        height: 100%;
+        background: white;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 80px 20px 20px;
+        transition: right 0.3s ease;
+        z-index: 1000;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      nav > ul.active {
+        right: 0;
+      }
+      
+      .nav-overlay.active {
+        display: block;
+      }
+      
+      nav ul li {
+        width: 100%;
+        margin: 5px 0;
+      }
+      
+      nav ul li a {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px 15px;
+      }
+      
+      .nav-product {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+      }
+      
+      .nav-product > a {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .product-dropdown {
+        position: static;
+        box-shadow: none;
+        display: none;
+        width: 100%;
+        opacity: 1;
+        transform: none;
+        margin-top: 5px;
+        background: #f9f9f9;
+      }
+      
+      .nav-product.active .product-dropdown {
+        display: block;
+      }
+      
+      .product-dropdown a {
+        padding-left: 30px;
+      }
+
       .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 15px;
@@ -474,20 +686,6 @@
 
       .category-title h2 {
         font-size: 1.5rem;
-      }
-
-      .product-dropdown {
-        position: static;
-        box-shadow: none;
-        border-radius: 0;
-        display: none;
-        opacity: 1;
-        transform: none;
-        width: 100%;
-      }
-
-      .nav-product:hover .product-dropdown {
-        display: block;
       }
 
       .category-title .view-all {
@@ -534,21 +732,23 @@
 </head>
 
 <body>
-<nav>
+  <nav>
     <a href="index.html">
       <img src="./Create_a_logo_concep-removebg-preview.png" alt="Damodar Traders Logo">
     </a>
     
+    <!-- Mobile menu button -->
     <button class="mobile-menu-btn" id="mobileMenuBtn">
       <i class="fas fa-bars"></i>
     </button>
     
+    <!-- Navigation overlay -->
     <div class="nav-overlay" id="navOverlay"></div>
     
     <ul id="navMenu">
       <li><a href="index.html">Home</a></li>
       <li class="nav-product">
-        <a href="categories.html">Product</a>
+        <a href="categories.html">Products</a>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
             d="M18.2197 8.546L12.2531 14.5126C12.1555 14.6102 11.9972 14.6102 11.8996 14.5126L6.02767 8.64067C5.73477 8.34778 5.2599 8.34778 4.96701 8.64067C4.67411 8.93357 4.67411 9.40844 4.96701 9.70133L10.8389 15.5732C11.5223 16.2566 12.6304 16.2566 13.3138 15.5732L19.2803 9.60666C19.5732 9.31377 19.5732 8.8389 19.2803 8.546C18.9874 8.25311 18.5126 8.25311 18.2197 8.546Z"
@@ -556,26 +756,20 @@
         </svg>
         <div class="product-dropdown">
           <a href="categories.html">All Categories</a>
-          <a href="products.html?category=pipes">Pipes</a>
-          <a href="products.html?category=fittings">Fittings</a>
-          <a href="products.html?category=valves">Valves</a>
-          <a href="products.html?category=other">Other Products</a>
+          <a href="categories.html?category=pipes">Pipes</a>
+          <a href="categories.html?category=fittings">Fittings</a>
+          <a href="categories.html?category=valves">Valves</a>
+          <a href="categories.html?category=other">Other Products</a>
         </div>
       </li>
       <li><a href="about.html">About Us</a></li>
       <li><a href="contact.html">Contact us</a></li>
-      <li><a href="login.html?type=user" id="authLink">Login</a></li>
     </ul>
-    
-    <div class="btn">
-      <button class="btn1" id="authButton">Log in</button>
-      <button class="btn1" id="registerButton" style="display: none;">Register</button>
-    </div>
   </nav>
 
   <hr class="line">
 
-  <!-- Add this right after <hr class="line"> -->
+  <!-- Industrial background -->
   <div class="industrial-background">
     <div class="pipes-container"></div>
     <div class="particles-container"></div>
@@ -609,7 +803,8 @@
         <button class="quick-filter-btn" data-category="fittings">Fittings</button>
         <button class="quick-filter-btn" data-category="valves">Valves</button>
         <button class="quick-filter-btn" data-category="other">Other</button>
-        <button class="quick-filter-btn" data-discount="true">On Sale</button>
+        
+        <button class="quick-filter-btn active" id="showAllButton">Show All</button>
       </div>
 
       <!-- Search Results Info -->
@@ -680,63 +875,159 @@
   <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script>
-       
-        document.addEventListener('DOMContentLoaded', function() {
-  // Initialize industrial background
-  createIndustrialBackground();
-  
-  // Make background responsive to window resize
-  window.addEventListener('resize', () => {
-    if (document.querySelector('.pipes-container')) {
-      document.querySelector('.pipes-container').innerHTML = '';
-      document.querySelector('.particles-container').innerHTML = '';
-      createIndustrialBackground();
-    }
-  });
-});
+    // Mobile menu functionality
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const navOverlay = document.getElementById('navOverlay');
 
+    // Check if elements exist before adding event listeners
+    if (mobileMenuBtn && navMenu && navOverlay) {
+      mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        navOverlay.classList.toggle('active');
+      });
+
+      navOverlay.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        navOverlay.classList.remove('active');
+      });
+
+      // Toggle product dropdown on mobile
+      const navProducts = document.querySelectorAll('.nav-product');
+      navProducts.forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (window.innerWidth <= 768) {
+            e.preventDefault();
+            item.classList.toggle('active');
+          }
+        });
+      });
+    }
+
+    // Industrial background animation
+    function createIndustrialBackground() {
+      const pipesContainer = document.querySelector('.pipes-container');
+      const particlesContainer = document.querySelector('.particles-container');
+      const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
+      
+      // Create horizontal pipes
+      for (let i = 0; i < 8; i++) {
+        const pipe = document.createElement('div');
+        pipe.className = 'pipe';
+        pipesContainer.appendChild(pipe);
+        
+        const isVertical = Math.random() > 0.5;
+        const duration = gsap.utils.random(30, 50);
+        const size = gsap.utils.random(10, 30);
+        const length = gsap.utils.random(200, 400);
+        
+        gsap.set(pipe, {
+          width: isVertical ? `${size}px` : `${length}px`,
+          height: isVertical ? `${length}px` : `${size}px`,
+          background: colors[Math.floor(Math.random() * colors.length)],
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
+          y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
+        });
+        
+        gsap.to(pipe, {
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
+          y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
+          duration: duration,
+          ease: "none",
+          repeat: -1
+        });
+      }
+      
+      // Create pipe connectors
+      for (let i = 0; i < 15; i++) {
+        const connector = document.createElement('div');
+        connector.className = 'pipe-connector';
+        pipesContainer.appendChild(connector);
+        
+        const size = gsap.utils.random(15, 40);
+        
+        gsap.set(connector, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        gsap.to(connector, {
+          opacity: 0.3,
+          duration: gsap.utils.random(3, 6),
+          yoyo: true,
+          repeat: -1,
+          delay: gsap.utils.random(0, 5)
+        });
+      }
+      
+      // Create floating particles (weld sparks)
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particlesContainer.appendChild(particle);
+        
+        const size = gsap.utils.random(2, 6);
+        
+        gsap.set(particle, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        // Spark animation
+        const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
+        tl.to(particle, {
+          opacity: 0.8,
+          duration: 0.3,
+          ease: "power1.out"
+        })
+        .to(particle, {
+          x: "+=50",
+          y: "+=50",
+          duration: 0.8,
+          ease: "power1.inOut"
+        })
+        .to(particle, {
+          opacity: 0,
+          duration: 0.3,
+          ease: "power1.in"
+        });
+      }
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
-      const API_BASE_URL = 'https://damodertraders.onrender.com/api';
+      // Initialize industrial background
+      if (document.querySelector('.pipes-container')) {
+        createIndustrialBackground();
+      }
+      
+      // Make background responsive to window resize
+      window.addEventListener('resize', () => {
+        if (document.querySelector('.pipes-container')) {
+          document.querySelector('.pipes-container').innerHTML = '';
+          document.querySelector('.particles-container').innerHTML = '';
+          createIndustrialBackground();
+        }
+      });
+
+      const API_BASE_URL = 'https://dttt-5.onrender.com/api';
       const urlParams = new URLSearchParams(window.location.search);
       const category = urlParams.get('category');
       const showAll = urlParams.get('showAll');
       const searchQuery = urlParams.get('search');
       const defaultImage = "assets/Screenshot_2025-06-19_201249-removebg-preview.png";
-      
-
-         
-    // Mobile menu toggle
-    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    const navMenu = document.getElementById('navMenu');
-    const navOverlay = document.getElementById('navOverlay');
-
-    mobileMenuBtn.addEventListener('click', () => {
-      navMenu.classList.toggle('active');
-      navOverlay.classList.toggle('active');
-    });
-
-    navOverlay.addEventListener('click', () => {
-      navMenu.classList.remove('active');
-      navOverlay.classList.remove('active');
-    });
-
-    // Toggle product dropdown on mobile
-    const navProducts = document.querySelectorAll('.nav-product');
-    navProducts.forEach(item => {
-      item.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
-          e.preventDefault();
-          item.classList.toggle('active');
-        }
-      });
-    });
-
 
       // Search state
       let currentSearchQuery = searchQuery || '';
-      let isSearching = false;
       let debounceTimer;
+
+      // Store all products globally
+      let allProducts = [];
 
       // If a specific category is selected, show only that category
       if (category) {
@@ -747,6 +1038,18 @@
         });
         document.getElementById('viewMoreBtn').style.display = 'none';
         document.querySelector('.categories-header h1').textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Products`;
+        
+        // Set the corresponding filter button as active
+        setTimeout(() => {
+          const activeButton = document.querySelector(`.quick-filter-btn[data-category="${category}"]`);
+          if (activeButton) {
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            activeButton.classList.add('active');
+            document.getElementById('showAllButton').classList.remove('active');
+          }
+        }, 100);
       }
 
       // More comprehensive fallback data
@@ -813,8 +1116,17 @@
         }
       ];
 
+      // Helper function to hide search suggestions
+      function hideSuggestions() {
+        const searchSuggestions = document.getElementById('searchSuggestions');
+        if (searchSuggestions) {
+          searchSuggestions.classList.remove('show');
+          searchSuggestions.innerHTML = '';
+        }
+      }
+
       // Load products with better error handling
-      async function loadProducts(searchTerm = '', categoryFilter = '') {
+      async function loadProducts(searchTerm = '', categoryFilter = '', discountFilter = false) {
         let products = [];
 
         try {
@@ -841,6 +1153,9 @@
 
           if (params.toString()) {
             endpoint = `/products/search?${params.toString()}`;
+          } else if (discountFilter) {
+            // Use discounted endpoint if only discount filter is active
+            endpoint = '/products/discounted';
           }
 
           const response = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -858,6 +1173,8 @@
 
           if (Array.isArray(apiProducts)) {
             products = apiProducts;
+            // Store products for filtering
+            allProducts = products;
             localStorage.setItem('productDetails', JSON.stringify(products));
           }
         } catch (error) {
@@ -865,14 +1182,21 @@
           // If no products loaded yet, use fallback
           if (products.length === 0) {
             products = filterFallbackProducts(searchTerm, categoryFilter);
+            allProducts = products;
             console.warn('Using fallback product data');
           }
         } finally {
+          // Apply discount filter if needed
+          if (discountFilter && endpoint !== '/products/discounted') {
+            products = products.filter(product => product.discount && product.discount > 0);
+          }
+          
           displayProducts(products);
 
           // Update search results info
-          if (searchTerm || categoryFilter) {
-            updateSearchResultsInfo(products.length, searchTerm);
+          if (searchTerm || categoryFilter || discountFilter) {
+            const filterType = categoryFilter || (discountFilter ? 'on sale' : searchTerm);
+            updateSearchResultsInfo(products.length, filterType);
           }
 
           hideLoadingState();
@@ -931,7 +1255,7 @@
         }
 
         if (products.length === 0) {
-          if (currentSearchQuery) {
+          if (currentSearchQuery || isFilterActive()) {
             // Show no search results message
             document.getElementById('noSearchResults').style.display = 'block';
             document.querySelectorAll('.category-section').forEach(section => {
@@ -945,14 +1269,6 @@
         } else {
           // Hide no search results message
           document.getElementById('noSearchResults').style.display = 'none';
-
-          // Show all category sections if not searching
-          if (!currentSearchQuery && !category) {
-            document.querySelectorAll('.category-section').forEach(section => {
-              section.style.display = 'block';
-            });
-            document.getElementById('viewMoreBtn').style.display = 'block';
-          }
         }
 
         // Group products by category
@@ -975,24 +1291,44 @@
         // Display products in their respective sections
         for (const [cat, categoryProducts] of Object.entries(productsByCategory)) {
           const gridElement = document.getElementById(`${cat}-grid`);
+          const sectionElement = document.getElementById(`${cat}-section`);
+          
           if (!gridElement) continue;
 
           gridElement.innerHTML = '';
 
           // Determine how many products to show
-          const productsToShow = (showAll || window.location.search.includes('category') || currentSearchQuery) ?
+          const productsToShow = (showAll || window.location.search.includes('category') || currentSearchQuery || isFilterActive()) ?
             categoryProducts :
             categoryProducts.slice(0, 4);
 
           if (productsToShow.length === 0) {
             gridElement.innerHTML = '<div class="no-products">No products available in this category</div>';
+            if (sectionElement && isFilterActive() && !category) {
+              sectionElement.style.display = 'none';
+            }
             continue;
+          }
+
+          // Show the section if it has products
+          if (sectionElement) {
+            sectionElement.style.display = 'block';
           }
 
           productsToShow.forEach(product => {
             const productCard = createProductCard(product);
             gridElement.appendChild(productCard);
           });
+        }
+        
+        // Show all sections if not filtering
+        if (!currentSearchQuery && !category && !isFilterActive()) {
+          document.querySelectorAll('.category-section').forEach(section => {
+            section.style.display = 'block';
+          });
+          document.getElementById('viewMoreBtn').style.display = 'block';
+        } else {
+          document.getElementById('viewMoreBtn').style.display = 'none';
         }
       }
 
@@ -1159,17 +1495,20 @@
           hideSuggestions();
           document.getElementById('searchResultsInfo').style.display = 'none';
           document.getElementById('noSearchResults').style.display = 'none';
+          
+          // Reset all filters
+          document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          document.getElementById('showAllButton').classList.add('active');
+          
+          // Show all sections
           document.querySelectorAll('.category-section').forEach(section => {
             section.style.display = 'block';
           });
           document.getElementById('viewMoreBtn').style.display = 'block';
 
-          // Reset quick filter buttons
-          document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-          });
-
-          // Update URL
+          // Update URL and load all products
           updateURL();
           loadProducts();
         });
@@ -1186,6 +1525,12 @@
           currentSearchQuery = query;
 
           if (query) {
+            // Reset filter buttons when searching
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            document.getElementById('showAllButton').classList.add('active');
+            
             loadProducts(query);
             updateURL();
             hideSuggestions();
@@ -1227,11 +1572,6 @@
           searchSuggestions.classList.add('show');
         }
 
-        function hideSuggestions() {
-          searchSuggestions.classList.remove('show');
-          searchSuggestions.innerHTML = '';
-        }
-
         function highlightText(text, query) {
           if (!query) return text;
 
@@ -1240,10 +1580,12 @@
         }
       }
 
-      // Quick filter functionality
+      // Quick filter functionality - FIXED
       function setupQuickFilters() {
+        const showAllButton = document.getElementById('showAllButton');
+        
         document.querySelectorAll('.quick-filter-btn').forEach(button => {
-          button.addEventListener('click', () => {
+          button.addEventListener('click', async () => {
             const category = button.getAttribute('data-category');
             const discount = button.getAttribute('data-discount');
 
@@ -1253,11 +1595,16 @@
             });
             button.classList.add('active');
 
+            // Clear search input
+            currentSearchQuery = '';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+              searchInput.value = '';
+            }
+            hideSuggestions();
+
             if (category) {
               // Filter by category
-              currentSearchQuery = '';
-              document.getElementById('searchInput').value = '';
-              hideSuggestions();
               document.getElementById('searchResultsInfo').style.display = 'block';
               document.getElementById('resultsCount').textContent = `Showing ${category} products`;
 
@@ -1271,29 +1618,70 @@
               });
 
               document.getElementById('viewMoreBtn').style.display = 'none';
-              loadProducts('', category);
+              
+              // Load products with category filter
+              await loadProducts('', category);
+              
             } else if (discount) {
               // Filter products with discount
-              currentSearchQuery = '';
-              document.getElementById('searchInput').value = '';
-              hideSuggestions();
               document.getElementById('searchResultsInfo').style.display = 'block';
               document.getElementById('resultsCount').textContent = 'Showing products on sale';
 
-              // Show all sections
+              // Show all sections initially
               document.querySelectorAll('.category-section').forEach(section => {
                 section.style.display = 'block';
               });
 
               document.getElementById('viewMoreBtn').style.display = 'none';
 
-              // Filter fallback products with discount
-              const discountedProducts = fallbackProducts.filter(product => product.discount > 0);
-              displayProducts(discountedProducts);
-              updateSearchResultsInfo(discountedProducts.length, 'on sale');
+              // Load discounted products
+              await loadProducts('', '', true);
+              
+            } else if (button === showAllButton) {
+              // Show all products
+              document.getElementById('searchResultsInfo').style.display = 'none';
+              document.getElementById('noSearchResults').style.display = 'none';
+
+              // Show all category sections
+              document.querySelectorAll('.category-section').forEach(section => {
+                section.style.display = 'block';
+              });
+
+              document.getElementById('viewMoreBtn').style.display = 'block';
+
+              // Load all products
+              await loadProducts();
             }
+            
+            // Update URL for filters
+            updateURLForFilter(category, discount);
           });
         });
+      }
+
+      function updateURLForFilter(category, discount) {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Remove previous filter parameters
+        urlParams.delete('category');
+        urlParams.delete('search');
+        
+        if (category) {
+          urlParams.set('category', category);
+        } else if (discount) {
+          urlParams.set('filter', 'discount');
+        } else {
+          urlParams.delete('filter');
+        }
+        
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      function isFilterActive() {
+        const activeBtn = document.querySelector('.quick-filter-btn.active');
+        if (!activeBtn) return false;
+        return activeBtn.id !== 'showAllButton';
       }
 
       function updateURL() {
@@ -1321,106 +1709,13 @@
       // Load products with initial search if present
       if (currentSearchQuery) {
         loadProducts(currentSearchQuery);
+      } else if (category) {
+        // If category is in URL, filter by it
+        loadProducts('', category);
       } else {
         loadProducts();
       }
     });
-
-    // Industrial Pipe Background Animation (same as index.html)
-function createIndustrialBackground() {
-  const pipesContainer = document.querySelector('.pipes-container');
-  const particlesContainer = document.querySelector('.particles-container');
-  const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
-  
-  // Create horizontal pipes
-  for (let i = 0; i < 8; i++) {
-    const pipe = document.createElement('div');
-    pipe.className = 'pipe';
-    pipesContainer.appendChild(pipe);
-    
-    const isVertical = Math.random() > 0.5;
-    const duration = gsap.utils.random(30, 50);
-    const size = gsap.utils.random(10, 30);
-    const length = gsap.utils.random(200, 400);
-    
-    gsap.set(pipe, {
-      width: isVertical ? `${size}px` : `${length}px`,
-      height: isVertical ? `${length}px` : `${size}px`,
-      background: colors[Math.floor(Math.random() * colors.length)],
-      x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
-      y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
-    });
-    
-    gsap.to(pipe, {
-      x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
-      y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
-      duration: duration,
-      ease: "none",
-      repeat: -1
-    });
-  }
-  
-  // Create pipe connectors
-  for (let i = 0; i < 15; i++) {
-    const connector = document.createElement('div');
-    connector.className = 'pipe-connector';
-    pipesContainer.appendChild(connector);
-    
-    const size = gsap.utils.random(15, 40);
-    
-    gsap.set(connector, {
-      width: `${size}px`,
-      height: `${size}px`,
-      x: gsap.utils.random(0, window.innerWidth),
-      y: gsap.utils.random(0, window.innerHeight),
-      opacity: 0
-    });
-    
-    gsap.to(connector, {
-      opacity: 0.3,
-      duration: gsap.utils.random(3, 6),
-      yoyo: true,
-      repeat: -1,
-      delay: gsap.utils.random(0, 5)
-    });
-  }
-  
-  // Create floating particles (weld sparks)
-  for (let i = 0; i < 20; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particlesContainer.appendChild(particle);
-    
-    const size = gsap.utils.random(2, 6);
-    
-    gsap.set(particle, {
-      width: `${size}px`,
-      height: `${size}px`,
-      x: gsap.utils.random(0, window.innerWidth),
-      y: gsap.utils.random(0, window.innerHeight),
-      opacity: 0
-    });
-    
-    // Spark animation
-    const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
-    tl.to(particle, {
-      opacity: 0.8,
-      duration: 0.3,
-      ease: "power1.out"
-    })
-    .to(particle, {
-      x: "+=50",
-      y: "+=50",
-      duration: 0.8,
-      ease: "power1.inOut"
-    })
-    .to(particle, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power1.in"
-    });
-  }
-}
   </script>
 </body>
 
