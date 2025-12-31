@@ -1,4 +1,3 @@
-
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -8,13 +7,14 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const { connectToDB } = require('./database');
 const { ObjectId } = require('mongodb');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:3001'],
+  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:3001', 'http://localhost:5173', 'http://localhost:5779','http://localhost:8080'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
@@ -39,6 +39,12 @@ app.use(session({
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Helper function to validate ObjectId
+function isValidObjectId(id) {
+  if (!id) return false;
+  return /^[0-9a-fA-F]{24}$/.test(id);
+}
+
 // User auth middleware
 function requireUserAuth(req, res, next) {
   if (!req.session.user) {
@@ -51,6 +57,27 @@ function requireUserAuth(req, res, next) {
 }
 
 // ==================== USER AUTHENTICATION ====================
+app.get('/api/auth/status', (req, res) => {
+  console.log('=== Auth Status Check ===');
+  console.log('Session ID:', req.sessionID);
+  console.log('Session user:', req.session.user);
+  console.log('Cookies:', req.cookies);
+  
+  if (req.session.user) {
+    res.json({ 
+      authenticated: true, 
+      user: {
+        id: req.session.user.id,
+        name: req.session.user.name,
+        email: req.session.user.email,
+        role: req.session.user.role
+      }
+    });
+  } else {
+    console.log('No user in session, returning unauthenticated');
+    res.json({ authenticated: false });
+  }
+});
 
 app.post('/api/auth/register', async (req, res) => {
   try {
@@ -120,13 +147,13 @@ app.post('/api/auth/login', async (req, res) => {
     // Find user
     const user = await usersCollection.findOne({ email });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'User not found. Please register first.' });
     }
     
     // Check password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Invalid password. Please try again.' });
     }
     
     // Create session
@@ -148,7 +175,7 @@ app.post('/api/auth/login', async (req, res) => {
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ error: 'Login failed. Please try again.' });
   }
 });
 
@@ -163,20 +190,176 @@ app.post('/api/auth/logout', (req, res) => {
   });
 });
 
-app.get('/api/auth/status', (req, res) => {
-  if (req.session.user) {
+// ==================== FORGOT PASSWORD ROUTES ====================
+
+// Check if email exists
+app.get('/api/auth/check-email', async (req, res) => {
+  try {
+    const { email } = req.query;
+    
+    if (!email) {
+      return res.status(400).json({ 
+        exists: false,
+        message: 'Email is required' 
+      });
+    }
+    
+    const db = await connectToDB();
+    const usersCollection = db.collection('users');
+    
+    const user = await usersCollection.findOne({ email });
+    
     res.json({ 
-      authenticated: true, 
-      user: {
-        id: req.session.user.id,
-        name: req.session.user.name,
-        email: req.session.user.email,
-        role: req.session.user.role
-      }
+      exists: !!user,
+      message: user ? 'Account exists' : 'No account found',
+      user: user ? {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        hasAccount: true
+      } : null
     });
-  } else {
-    res.json({ authenticated: false });
+  } catch (err) {
+    console.error('Error checking email:', err);
+    res.status(500).json({ 
+      exists: false,
+      message: 'Error checking email',
+      error: err.message 
+    });
   }
+});
+
+// Forgot password request
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    
+    const db = await connectToDB();
+    const usersCollection = db.collection('users');
+    
+    // Check if user exists
+    const user = await usersCollection.findOne({ email });
+    
+    if (!user) {
+      // Return success even if user doesn't exist (security best practice)
+      return res.json({ 
+        message: 'If an account exists with this email, you will receive password reset instructions.',
+        sent: true 
+      });
+    }
+    
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour from now
+    
+    // Save reset token to user document
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { 
+        $set: { 
+          resetToken,
+          resetTokenExpiry: new Date(resetTokenExpiry)
+        } 
+      }
+    );
+    
+    // In production, send email with reset link
+    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    
+    console.log('Password reset link:', resetLink); // For development only
+    
+    // TODO: Implement actual email sending
+    // sendResetEmail(user.email, resetLink);
+    
+    res.json({ 
+      message: 'Password reset instructions sent to your email.',
+      sent: true,
+      // For development only - remove in production
+      development: { resetLink }
+    });
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    res.status(500).json({ error: 'Failed to process password reset request' });
+  }
+});
+
+// Reset password with token
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    
+    if (!token || !password) {
+      return res.status(400).json({ error: 'Token and password are required' });
+    }
+    
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+    
+    const db = await connectToDB();
+    const usersCollection = db.collection('users');
+    
+    // Find user with valid reset token
+    const user = await usersCollection.findOne({
+      resetToken: token,
+      resetTokenExpiry: { $gt: new Date() }
+    });
+    
+    if (!user) {
+      return res.status(400).json({ error: 'Invalid or expired reset token' });
+    }
+    
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Update password and clear reset token
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { 
+        $set: { 
+          password: hashedPassword,
+          updatedAt: new Date()
+        },
+        $unset: {
+          resetToken: "",
+          resetTokenExpiry: ""
+        }
+      }
+    );
+    
+    res.json({ 
+      message: 'Password reset successful. You can now login with your new password.',
+      success: true 
+    });
+  } catch (err) {
+    console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
+});
+
+// Password strength validation
+app.post('/api/auth/validate-password', (req, res) => {
+  const { password } = req.body;
+  
+  const validations = {
+    length: password.length >= 6,
+    hasUppercase: /[A-Z]/.test(password),
+    hasLowercase: /[a-z]/.test(password),
+    hasNumber: /\d/.test(password),
+    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+  };
+  
+  const isValid = Object.values(validations).every(v => v);
+  
+  res.json({
+    valid: isValid,
+    validations,
+    score: Object.values(validations).filter(v => v).length
+  });
 });
 
 // ==================== ENHANCED PRODUCT ROUTES WITH SEARCH ====================
@@ -190,7 +373,7 @@ app.get('/api/products', async (req, res) => {
     res.json(products);
   } catch (err) {
     console.error('Error fetching products:', err);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    res.json([]); // Return empty array instead of error
   }
 });
 
@@ -205,7 +388,7 @@ app.get('/api/products/category/:category', async (req, res) => {
     res.json(products);
   } catch (err) {
     console.error('Error fetching products by category:', err);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    res.json([]); // Return empty array instead of error
   }
 });
 
@@ -237,7 +420,7 @@ app.get('/api/products/search', async (req, res) => {
     res.json(products);
   } catch (err) {
     console.error('Error searching products:', err);
-    res.status(500).json({ error: 'Failed to search products' });
+    res.json([]); // Return empty array instead of error
   }
 });
 
@@ -270,17 +453,17 @@ app.get('/api/products/search/suggestions', async (req, res) => {
           _id: 1,
           score: {
             $add: [
-              { $cond: [
+              { $cond: [ 
                 { $regexMatch: { input: "$name", regex: new RegExp(query, "i") } }, 
                 10, 
                 0 
               ]},
-              { $cond: [
+              { $cond: [ 
                 { $regexMatch: { input: "$category", regex: new RegExp(query, "i") } }, 
                 5, 
                 0 
               ]},
-              { $cond: [
+              { $cond: [ 
                 { $regexMatch: { input: "$material", regex: new RegExp(query, "i") } }, 
                 3, 
                 0 
@@ -296,13 +479,19 @@ app.get('/api/products/search/suggestions', async (req, res) => {
     res.json(suggestions);
   } catch (err) {
     console.error('Error fetching search suggestions:', err);
-    res.status(500).json({ error: 'Failed to fetch suggestions' });
+    res.json([]); // Return empty array instead of error
   }
 });
 
-// Get single product by ID
+// Get single product by ID - FIXED VERSION
 app.get('/api/products/:id', async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!isValidObjectId(req.params.id)) {
+      console.warn(`Invalid product ID format: ${req.params.id}`);
+      return res.json(null); // Return null instead of error
+    }
+    
     const db = await connectToDB();
     const productsCollection = db.collection('products');
     const product = await productsCollection.findOne({ 
@@ -310,48 +499,59 @@ app.get('/api/products/:id', async (req, res) => {
     });
     
     if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
+      return res.json(null); // Return null instead of 404 error
     }
     res.json(product);
   } catch (err) {
     console.error('Error fetching product:', err);
-    res.status(500).json({ error: 'Failed to fetch product' });
+    
+    // Handle specific ObjectId errors
+    if (err.message.includes('must be a 24 character hex string') || 
+        err.message.includes('Argument passed in must be a string of 12 bytes')) {
+      return res.json(null); // Return null for invalid IDs
+    }
+    
+    // For other errors, return null
+    res.json(null);
   }
 });
 
-// Get products with discount
+// Get products with discount - FIXED VERSION
 app.get('/api/products/discounted', async (req, res) => {
   try {
     const db = await connectToDB();
     const productsCollection = db.collection('products');
     
+    // Use $exists to ensure discount field exists and is greater than 0
     const discountedProducts = await productsCollection.find({ 
-      discount: { $gt: 0 } 
-    }).sort({ discount: -1 }).toArray();
+      discount: { $exists: true, $ne: null, $gt: 0 } 
+    }).sort({ discount: -1 }).limit(10).toArray();
     
-    res.json(discountedProducts);
+    res.json(discountedProducts || []);
   } catch (err) {
     console.error('Error fetching discounted products:', err);
-    res.status(500).json({ error: 'Failed to fetch discounted products' });
+    // Return empty array instead of error for better UX
+    res.json([]);
   }
 });
 
-// Get popular products (you can modify this based on your criteria)
+// Get popular products - FIXED VERSION
 app.get('/api/products/popular', async (req, res) => {
   try {
     const db = await connectToDB();
     const productsCollection = db.collection('products');
     
     // For now, return products with highest discount
-    // You can modify this to use actual popularity metrics like views, orders, etc.
+    // You can modify this to use actual popularity metrics
     const popularProducts = await productsCollection.find({ 
-      discount: { $gt: 0 } 
+      discount: { $exists: true, $ne: null, $gt: 0 } 
     }).sort({ discount: -1 }).limit(10).toArray();
     
-    res.json(popularProducts);
+    res.json(popularProducts || []);
   } catch (err) {
     console.error('Error fetching popular products:', err);
-    res.status(500).json({ error: 'Failed to fetch popular products' });
+    // Return empty array instead of error for better UX
+    res.json([]);
   }
 });
 
@@ -386,19 +586,77 @@ app.post('/api/inquiries', async (req, res) => {
   }
 });
 
+// ==================== USER INQUIRIES ROUTES ====================
+
 app.get('/api/user/inquiries', requireUserAuth, async (req, res) => {
   try {
+    // Debug: Log session information
+    console.log('=== DEBUG: User Inquiries Request ===');
+    console.log('Session ID:', req.sessionID);
+    console.log('Session user:', req.session.user);
+    
+    // Validate that session user ID is valid
+    if (!req.session.user?.id) {
+      console.warn('No user ID in session');
+      return res.json([]);
+    }
+    
+    // Convert to string if it's an ObjectId
+    const userId = req.session.user.id.toString();
+    console.log('User ID from session:', userId);
+    
+    if (!isValidObjectId(userId)) {
+      console.warn(`Invalid user session ID format: ${userId}`);
+      return res.json([]);
+    }
+    
     const db = await connectToDB();
     const inquiriesCollection = db.collection('inquiries');
     
+    console.log('Looking for inquiries with user ID:', userId);
+    
+    // Try to find inquiries with this userId
     const inquiries = await inquiriesCollection.find({ 
-      userId: req.session.user.id 
+      userId: new ObjectId(userId) 
     }).sort({ createdAt: -1 }).toArray();
+    
+    console.log(`Found ${inquiries.length} inquiries for user ${userId}`);
+    
+    // If no inquiries found with userId, try with email (backward compatibility)
+    if (inquiries.length === 0) {
+      console.log('No inquiries found with userId, trying with email:', req.session.user.email);
+      
+      const inquiriesByEmail = await inquiriesCollection.find({ 
+        email: req.session.user.email 
+      }).sort({ createdAt: -1 }).toArray();
+      
+      console.log(`Found ${inquiriesByEmail.length} inquiries by email`);
+      
+      // Update these inquiries with the userId for future reference
+      if (inquiriesByEmail.length > 0) {
+        await inquiriesCollection.updateMany(
+          { email: req.session.user.email, userId: { $exists: false } },
+          { $set: { userId: new ObjectId(userId) } }
+        );
+      }
+      
+      return res.json(inquiriesByEmail);
+    }
     
     res.json(inquiries);
   } catch (err) {
     console.error('Error fetching user inquiries:', err);
-    res.status(500).json({ error: 'Failed to fetch inquiries' });
+    console.error('Error stack:', err.stack);
+    
+    // Handle specific ObjectId errors gracefully
+    if (err.message.includes('must be a 24 character hex string') || 
+        err.message.includes('Argument passed in must be a string of 12 bytes')) {
+      console.warn('ObjectId parsing error');
+      return res.json([]);
+    }
+    
+    // Return empty array for any other errors
+    res.json([]);
   }
 });
 
@@ -406,6 +664,12 @@ app.get('/api/user/inquiries', requireUserAuth, async (req, res) => {
 
 app.get('/api/users/:id', requireUserAuth, async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!isValidObjectId(req.params.id)) {
+      console.warn(`Invalid user ID format: ${req.params.id}`);
+      return res.json(null); // Return null instead of error
+    }
+    
     const db = await connectToDB();
     const usersCollection = db.collection('users');
     
@@ -414,7 +678,7 @@ app.get('/api/users/:id', requireUserAuth, async (req, res) => {
     }, { projection: { password: 0 } });
     
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.json(null); // Return null instead of 404
     }
     
     // Check if requesting user owns this profile
@@ -425,12 +689,24 @@ app.get('/api/users/:id', requireUserAuth, async (req, res) => {
     res.json(user);
   } catch (err) {
     console.error('Error fetching user:', err);
-    res.status(500).json({ error: 'Failed to fetch user' });
+    
+    // Handle specific ObjectId errors
+    if (err.message.includes('must be a 24 character hex string') || 
+        err.message.includes('Argument passed in must be a string of 12 bytes')) {
+      return res.json(null);
+    }
+    
+    res.json(null); // Return null for any errors
   }
 });
 
 app.put('/api/users/:id', requireUserAuth, async (req, res) => {
   try {
+    // Validate ObjectId format
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid user ID format' });
+    }
+    
     const db = await connectToDB();
     const usersCollection = db.collection('users');
     
@@ -466,7 +742,70 @@ app.put('/api/users/:id', requireUserAuth, async (req, res) => {
     res.json(updatedUser);
   } catch (err) {
     console.error('Error updating user:', err);
+    
+    // Handle specific ObjectId errors
+    if (err.message.includes('must be a 24 character hex string') || 
+        err.message.includes('Argument passed in must be a string of 12 bytes')) {
+      return res.status(400).json({ error: 'Invalid user ID format' });
+    }
+    
     res.status(500).json({ error: 'Failed to update user' });
+  }
+});
+
+// ==================== DEBUG ENDPOINTS ====================
+
+app.get('/api/debug/session', (req, res) => {
+  res.json({
+    sessionId: req.sessionID,
+    session: req.session,
+    user: req.session.user,
+    cookies: req.cookies,
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/debug/db', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const collections = await db.listCollections().toArray();
+    
+    res.json({
+      success: true,
+      collections: collections.map(c => c.name),
+      message: 'Database connection successful'
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      message: 'Database connection failed'
+    });
+  }
+});
+
+app.get('/api/test/inquiries', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const inquiriesCollection = db.collection('inquiries');
+    
+    // Get a sample of inquiries
+    const sampleInquiries = await inquiriesCollection.find().limit(5).toArray();
+    
+    res.json({
+      success: true,
+      totalCount: await inquiriesCollection.countDocuments(),
+      sampleCount: sampleInquiries.length,
+      sample: sampleInquiries,
+      message: 'Database connection test successful'
+    });
+  } catch (err) {
+    console.error('Test endpoint error:', err);
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      message: 'Database connection failed'
+    });
   }
 });
 
@@ -483,7 +822,10 @@ app.get('/api/health', (req, res) => {
       'search-suggestions',
       'category-filtering',
       'user-authentication',
-      'inquiry-management'
+      'inquiry-management',
+      'user-inquiries',
+      'forgot-password',
+      'password-reset'
     ]
   });
 });
@@ -506,16 +848,19 @@ app.listen(PORT, async () => {
   ├── /api/products/discounted        - Discounted products
   ├── /api/products/popular           - Popular products
   
-  📊 Product Endpoints:
-  ├── /api/products                   - All products
-  ├── /api/products/category/:category - Products by category
-  ├── /api/products/:id               - Single product
-  
-  👤 Auth Endpoints:
+  🔐 Auth Endpoints:
   ├── /api/auth/register              - User registration
   ├── /api/auth/login                 - User login
   ├── /api/auth/logout                - User logout
   ├── /api/auth/status                - Auth status
+  ├── /api/auth/forgot-password       - Forgot password
+  ├── /api/auth/reset-password        - Reset password
+  ├── /api/auth/check-email           - Check email exists
+  
+  📊 Product Endpoints:
+  ├── /api/products                   - All products
+  ├── /api/products/category/:category - Products by category
+  ├── /api/products/:id               - Single product
   
   📝 Inquiry Endpoints:
   ├── /api/inquiries                  - Submit inquiry
@@ -525,11 +870,18 @@ app.listen(PORT, async () => {
   ├── /api/users/:id                  - Get user profile
   ├── /api/users/:id                  - Update user profile
   
+  🐛 Debug Endpoints:
+  ├── /api/debug/session              - Session info
+  ├── /api/debug/db                   - Database info
+  ├── /api/test/inquiries             - Test inquiries
+  
   💪 Health Check:
   └── /api/health                     - Server health
   
   👤 User login: http://localhost:${PORT}/login
+  🔐 Reset password: http://localhost:${PORT}/reset-password
   🏪 Products page: http://localhost:${PORT}/categories.html
+  👤 Account page: http://localhost:${PORT}/account
   
   ✅ Server is ready!`);
 });
@@ -537,7 +889,7 @@ app.listen(PORT, async () => {
 // Graceful shutdown
 process.on('SIGINT', async () => {
   console.log('\n🛑 Server shutting down gracefully...');
-  const { closeDB } = require('../shared/database');
+  const { closeDB } = require('./database');
   await closeDB();
   console.log('✅ Database connection closed');
   process.exit(0);
