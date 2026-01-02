@@ -9,93 +9,32 @@ const { connectToDB } = require('./database');
 const { ObjectId } = require('mongodb');
 const crypto = require('crypto');
 
-// Try different import methods for connect-mongo
-let MongoStore;
-try {
-  // For newer versions
-  MongoStore = require('connect-mongo').default || require('connect-mongo');
-} catch (err) {
-  console.log('connect-mongo not found, using memory store');
-  MongoStore = null;
-}
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration - ALLOW ALL FOR DEVELOPMENT
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow all origins for development
-    if (process.env.NODE_ENV === 'development' || !process.env.NODE_ENV) {
-      return callback(null, true);
-    }
-    
-    // Production: allow specific origins
-    const allowedOrigins = [
-      'http://localhost:3000', 
-      'http://127.0.0.1:5500', 
-      'http://localhost:3001',
-      'http://localhost:8080',
-      'http://192.168.1.9:8080',
-      'http://192.168.1.9:3000',
-      'https://damodertraders.onrender.com'
-    ];
-    
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Auth-Token'],
-  credentials: true,
-  exposedHeaders: ['Set-Cookie']
-};
-
-app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
+// CORS configuration
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:3001','http://localhost:8080'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// Enhanced session configuration
-const sessionConfig = {
-  secret: process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
-  resave: false,
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'user123',
+  resave: true,
   saveUninitialized: false,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
+    secure: false,
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    path: '/',
-  },
-  name: 'damodar_auth',
-  proxy: true // Trust proxy for secure cookies
-};
-
-// Add MongoStore if available
-if (MongoStore && process.env.MONGODB_URI) {
-  try {
-    sessionConfig.store = new MongoStore({
-      mongoUrl: process.env.MONGODB_URI,
-      ttl: 24 * 60 * 60, // 1 day
-      autoRemove: 'native'
-    });
-    console.log('Using MongoDB session store');
-  } catch (err) {
-    console.log('Failed to create MongoStore, using memory store:', err.message);
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000
   }
-} else {
-  console.log('Using memory session store (not recommended for production)');
-}
-
-app.use(session(sessionConfig));
+}));
 
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
@@ -108,68 +47,23 @@ function isValidObjectId(id) {
 
 // User auth middleware
 function requireUserAuth(req, res, next) {
-  console.log('=== Auth Middleware Check ===');
-  console.log('Session ID:', req.sessionID);
-  console.log('Session user:', req.session.user);
-  console.log('Headers:', req.headers);
-  
-  // Check session first
-  if (req.session.user) {
-    console.log('User authenticated via session');
-    return next();
-  }
-  
-  // Check for token in headers
-  const token = req.headers['x-auth-token'];
-  if (token) {
-    console.log('Token found in headers');
-    // Validate token (simplified - in production use JWT)
-    try {
-      const tokenData = JSON.parse(Buffer.from(token, 'base64').toString());
-      if (tokenData.userId && tokenData.expiry > Date.now()) {
-        req.session.user = {
-          id: tokenData.userId,
-          email: tokenData.email,
-          name: tokenData.name,
-          role: tokenData.role || 'user'
-        };
-        console.log('User authenticated via token');
-        return next();
-      }
-    } catch (err) {
-      console.log('Token validation failed:', err.message);
+  if (!req.session.user) {
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
+    return res.status(401).json({ error: 'Please login first' });
   }
-  
-  console.log('No valid authentication found');
-  return res.status(401).json({ 
-    error: 'Unauthorized', 
-    message: 'Please login to access this resource',
-    requiresLogin: true 
-  });
+  next();
 }
 
-// ==================== ENHANCED AUTH ENDPOINTS ====================
-
+// ==================== USER AUTHENTICATION ====================
 app.get('/api/auth/status', (req, res) => {
   console.log('=== Auth Status Check ===');
-  console.log('Request Origin:', req.headers.origin);
   console.log('Session ID:', req.sessionID);
-  console.log('Session:', req.session);
+  console.log('Session user:', req.session.user);
   console.log('Cookies:', req.cookies);
   
   if (req.session.user) {
-    // Generate a token for cross-origin requests
-    const tokenData = {
-      userId: req.session.user.id,
-      email: req.session.user.email,
-      name: req.session.user.name,
-      role: req.session.user.role,
-      expiry: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
-    };
-    
-    const authToken = Buffer.from(JSON.stringify(tokenData)).toString('base64');
-    
     res.json({ 
       authenticated: true, 
       user: {
@@ -177,30 +71,20 @@ app.get('/api/auth/status', (req, res) => {
         name: req.session.user.name,
         email: req.session.user.email,
         role: req.session.user.role
-      },
-      token: authToken
+      }
     });
   } else {
-    console.log('No user in session');
-    res.json({ 
-      authenticated: false,
-      message: 'Not logged in'
-    });
+    console.log('No user in session, returning unauthenticated');
+    res.json({ authenticated: false });
   }
 });
 
-// Enhanced registration with token generation
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
     
-    console.log('Registration attempt:', { name, email, phone });
-    
     if (!name || !email || !password) {
-      return res.status(400).json({ 
-        error: 'Validation failed',
-        message: 'Name, email and password are required' 
-      });
+      return res.status(400).json({ error: 'Name, email and password are required' });
     }
     
     const db = await connectToDB();
@@ -209,10 +93,7 @@ app.post('/api/auth/register', async (req, res) => {
     // Check if user already exists
     const existingUser = await usersCollection.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ 
-        error: 'User exists',
-        message: 'User with this email already exists. Please login.' 
-      });
+      return res.status(400).json({ error: 'User already exists' });
     }
     
     // Hash password
@@ -225,73 +106,39 @@ app.post('/api/auth/register', async (req, res) => {
       password: hashedPassword,
       role: 'user',
       createdAt: new Date(),
-      updatedAt: new Date(),
-      lastLogin: new Date()
+      updatedAt: new Date()
     };
     
     const result = await usersCollection.insertOne(newUser);
     
-    const userId = result.insertedId.toString();
-    
     // Create session
     req.session.user = {
-      id: userId,
+      id: result.insertedId,
       email: newUser.email,
       name: newUser.name,
       role: 'user'
     };
     
-    // Generate token
-    const tokenData = {
-      userId: userId,
-      email: newUser.email,
-      name: newUser.name,
-      role: 'user',
-      expiry: Date.now() + (24 * 60 * 60 * 1000)
-    };
-    
-    const authToken = Buffer.from(JSON.stringify(tokenData)).toString('base64');
-    
-    // Update last login
-    await usersCollection.updateOne(
-      { _id: result.insertedId },
-      { $set: { lastLogin: new Date() } }
-    );
-    
-    console.log('Registration successful for:', email);
-    
     res.status(201).json({ 
-      success: true,
       message: 'Registration successful',
       user: {
-        id: userId,
+        id: result.insertedId,
         name: newUser.name,
-        email: newUser.email,
-        phone: newUser.phone
-      },
-      token: authToken
+        email: newUser.email
+      }
     });
   } catch (err) {
     console.error('Registration error:', err);
-    res.status(500).json({ 
-      error: 'Registration failed',
-      message: 'An error occurred during registration. Please try again.' 
-    });
+    res.status(500).json({ error: 'Registration failed' });
   }
 });
 
-// Enhanced login with multiple auth methods
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
     
-    console.log('Login attempt for:', email);
-    
     if (!email || !password) {
-      return res.status(400).json({ 
-        error: 'Validation failed',
-        message: 'Email and password are required' 
-      });
+      return res.status(400).json({ error: 'Email and password are required' });
     }
     
     const db = await connectToDB();
@@ -300,191 +147,52 @@ app.post('/api/auth/login', async (req, res) => {
     // Find user
     const user = await usersCollection.findOne({ email });
     if (!user) {
-      console.log('User not found:', email);
-      return res.status(401).json({ 
-        error: 'Authentication failed',
-        message: 'Invalid email or password. Please try again.',
-        code: 'USER_NOT_FOUND'
-      });
+      return res.status(401).json({ error: 'User not found. Please register first.' });
     }
     
     // Check password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      console.log('Invalid password for:', email);
-      return res.status(401).json({ 
-        error: 'Authentication failed',
-        message: 'Invalid email or password. Please try again.',
-        code: 'INVALID_PASSWORD'
-      });
+      return res.status(401).json({ error: 'Invalid password. Please try again.' });
     }
-    
-    const userId = user._id.toString();
     
     // Create session
     req.session.user = {
-      id: userId,
+      id: user._id,
       email: user.email,
       name: user.name,
       role: user.role
     };
     
-    // Generate token for cross-origin
-    const tokenData = {
-      userId: userId,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      expiry: Date.now() + (24 * 60 * 60 * 1000)
-    };
-    
-    const authToken = Buffer.from(JSON.stringify(tokenData)).toString('base64');
-    
-    // Update last login
-    await usersCollection.updateOne(
-      { _id: user._id },
-      { $set: { lastLogin: new Date() } }
-    );
-    
-    // Save session explicitly
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-      } else {
-        console.log('Session saved for:', email);
-      }
-    });
-    
-    console.log('Login successful for:', email);
-    console.log('Session ID:', req.sessionID);
-    
     res.json({ 
-      success: true,
       message: 'Login successful',
       user: {
-        id: userId,
+        id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
-        role: user.role
-      },
-      token: authToken,
-      sessionId: req.sessionID
+        phone: user.phone
+      }
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ 
-      error: 'Login failed',
-      message: 'An error occurred during login. Please try again.' 
-    });
+    res.status(500).json({ error: 'Login failed. Please try again.' });
   }
 });
 
 app.post('/api/auth/logout', (req, res) => {
-  const userEmail = req.session.user?.email;
-  
   req.session.destroy(err => {
     if (err) {
       console.error('Logout error:', err);
-      return res.status(500).json({ 
-        error: 'Logout failed',
-        message: 'Failed to logout. Please try again.' 
-      });
+      return res.status(500).json({ error: 'Logout failed' });
     }
-    
-    // Clear the session cookie
-    res.clearCookie('damodar_auth', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      path: '/'
-    });
-    
-    console.log('Logout successful for:', userEmail);
-    res.json({ 
-      success: true,
-      message: 'Logout successful' 
-    });
+    res.clearCookie('connect.sid');
+    res.json({ message: 'Logout successful' });
   });
-});
-
-// Token refresh endpoint
-app.post('/api/auth/refresh', async (req, res) => {
-  try {
-    const { token } = req.body;
-    
-    if (!token) {
-      return res.status(400).json({ 
-        error: 'Token required',
-        message: 'Authentication token is required' 
-      });
-    }
-    
-    // Decode and validate token
-    const tokenData = JSON.parse(Buffer.from(token, 'base64').toString());
-    
-    if (tokenData.expiry < Date.now()) {
-      return res.status(401).json({ 
-        error: 'Token expired',
-        message: 'Your session has expired. Please login again.' 
-      });
-    }
-    
-    const db = await connectToDB();
-    const usersCollection = db.collection('users');
-    
-    const user = await usersCollection.findOne({ 
-      _id: new ObjectId(tokenData.userId) 
-    });
-    
-    if (!user) {
-      return res.status(401).json({ 
-        error: 'User not found',
-        message: 'User account not found. Please register.' 
-      });
-    }
-    
-    // Create new token with extended expiry
-    const newTokenData = {
-      userId: tokenData.userId,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      expiry: Date.now() + (24 * 60 * 60 * 1000)
-    };
-    
-    const newToken = Buffer.from(JSON.stringify(newTokenData)).toString('base64');
-    
-    // Also create/update session
-    req.session.user = {
-      id: tokenData.userId,
-      email: user.email,
-      name: user.name,
-      role: user.role
-    };
-    
-    res.json({
-      success: true,
-      token: newToken,
-      user: {
-        id: tokenData.userId,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      }
-    });
-    
-  } catch (err) {
-    console.error('Token refresh error:', err);
-    res.status(401).json({ 
-      error: 'Invalid token',
-      message: 'Invalid authentication token' 
-    });
-  }
 });
 
 // ==================== FORGOT PASSWORD ROUTES ====================
 
+// Check if email exists
 app.get('/api/auth/check-email', async (req, res) => {
   try {
     const { email } = req.query;
@@ -521,6 +229,7 @@ app.get('/api/auth/check-email', async (req, res) => {
   }
 });
 
+// Forgot password request
 app.post('/api/auth/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -578,6 +287,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   }
 });
 
+// Reset password with token
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -1115,9 +825,7 @@ app.get('/api/health', (req, res) => {
       'inquiry-management',
       'user-inquiries',
       'forgot-password',
-      'password-reset',
-      'token-auth',
-      'session-auth'
+      'password-reset'
     ]
   });
 });
@@ -1131,30 +839,51 @@ app.listen(PORT, async () => {
 ╚══════════════════════════════════════════════════════════╝
   
   🚀 Server running on port: ${PORT}
-  🌐 Environment: ${process.env.NODE_ENV || 'development'}
-  🔧 API Base URL: https://damodertraders.onrender.com/api
+  📁 Static files from: ${path.join(__dirname, 'public')}
+  🔧 API Base URL: http://localhost:${PORT}/api
   
-  🔐 AUTHENTICATION METHODS:
-  ├── Session-based (cookies) for same-origin
-  ├── Token-based for cross-origin
-  ├── Dual authentication support
+  🔍 Search Endpoints:
+  ├── /api/products/search            - Search products
+  ├── /api/products/search/suggestions - Real-time suggestions
+  ├── /api/products/discounted        - Discounted products
+  ├── /api/products/popular           - Popular products
   
-  📱 SUPPORTED ORIGINS:
-  ├── http://localhost:3000
-  ├── http://localhost:8080
-  ├── http://192.168.1.9:8080
-  ├── http://192.168.1.9:3000
-  └── https://damodertraders.onrender.com
+  🔐 Auth Endpoints:
+  ├── /api/auth/register              - User registration
+  ├── /api/auth/login                 - User login
+  ├── /api/auth/logout                - User logout
+  ├── /api/auth/status                - Auth status
+  ├── /api/auth/forgot-password       - Forgot password
+  ├── /api/auth/reset-password        - Reset password
+  ├── /api/auth/check-email           - Check email exists
+  
+  📊 Product Endpoints:
+  ├── /api/products                   - All products
+  ├── /api/products/category/:category - Products by category
+  ├── /api/products/:id               - Single product
+  
+  📝 Inquiry Endpoints:
+  ├── /api/inquiries                  - Submit inquiry
+  ├── /api/user/inquiries             - User inquiries
+  
+  👤 User Endpoints:
+  ├── /api/users/:id                  - Get user profile
+  ├── /api/users/:id                  - Update user profile
+  
+  🐛 Debug Endpoints:
+  ├── /api/debug/session              - Session info
+  ├── /api/debug/db                   - Database info
+  ├── /api/test/inquiries             - Test inquiries
+  
+  💪 Health Check:
+  └── /api/health                     - Server health
+  
+  👤 User login: http://localhost:${PORT}/login
+  🔐 Reset password: http://localhost:${PORT}/reset-password
+  🏪 Products page: http://localhost:${PORT}/categories.html
+  👤 Account page: http://localhost:${PORT}/account
   
   ✅ Server is ready!`);
-  
-  // Test database connection
-  try {
-    const db = await connectToDB();
-    console.log('✅ Database connected successfully');
-  } catch (err) {
-    console.error('❌ Database connection failed:', err.message);
-  }
 });
 
 // Graceful shutdown
