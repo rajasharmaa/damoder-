@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:3001', 'http://localhost:5173', 'http://localhost:5779','http://localhost:8080','http://192.168.1.9:8080'],
+  origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'https://damodertraders-z8yc.onrender.com','http://localhost:3001', 'http://localhost:5173', 'http://localhost:5779','http://localhost:8080','http://192.168.1.9:8080'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
