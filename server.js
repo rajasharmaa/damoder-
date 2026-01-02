@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 // Determine environment
 const isProduction = process.env.NODE_ENV === 'production';
-const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+const frontendUrl = process.env.FRONTEND_URL || 'https://damoder-traders-x2iy.vercel.app';
 
 console.log('Environment:', isProduction ? 'Production' : 'Development');
 console.log('Frontend URL:', frontendUrl);
