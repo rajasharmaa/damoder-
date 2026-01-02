@@ -31,6 +31,7 @@ app.use(cors({
       'http://localhost:3001',
       'http://127.0.0.1:5500',
       'http://localhost:8080',
+      'https://damoder-traders-x2iy.vercel.app'
       frontendUrl
     ].filter(Boolean);
     
