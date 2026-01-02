@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Categories - Damodar Traders</title>
+    <link rel="stylesheet" href="style1.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.css">
   <style>
@@ -21,113 +22,7 @@
       background-color: #f9f9f9;
     }
 
-    nav {
-      height: 90px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      left: 0;
-      justify-content: space-around;
-      background-color: #ffffff;
-      backdrop-filter: blur(10px);
-      z-index: 999;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    nav>ul {
-      display: flex;
-      align-items: center;
-      font-size: clamp(14px, 1.3vw, 18px);
-      gap: 40px;
-      list-style: none;
-    }
-
-    nav img {
-      width: min(15vw, 200px);
-      margin-top: 10px;
-    }
-
-    a {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      padding: 15px;
-      color: #333;
-    }
-
-    .btn .btn1 {
-      padding: 12px 20px;
-      border: none;
-      border-radius: 25px;
-      font-size: clamp(12px, 1vw, 16px);
-      box-shadow: 5px 3px 5px rgba(0, 0, 0, 0.1);
-      margin-right: 10px;
-      transition: transform 0.3s, background-color 0.3s;
-      background-color: #2a5f8a;
-      color: white;
-    }
-
-    .btn1:hover {
-      background-color: #1d4567;
-      transform: scale(1.05);
-    }
-
-    .nav-product {
-      display: flex;
-      align-items: center;
-      position: relative;
-    }
-
-    .nav-product svg {
-      margin-left: 5px;
-      width: 18px;
-      height: 18px;
-      transition: transform 0.3s;
-    }
-
-    .product-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: white;
-      min-width: 180px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      border-radius: 5px;
-      padding: 8px 0;
-      z-index: 1000;
-      opacity: 0;
-      transform: translateY(10px);
-      transition: opacity 0.3s, transform 0.3s;
-    }
-
-    .nav-product:hover .product-dropdown,
-    .product-dropdown:hover {
-      display: block;
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .nav-product:hover svg {
-      transform: rotate(180deg);
-    }
-
-    .product-dropdown a {
-      display: block;
-      padding: 10px 16px;
-      color: #555;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-
-    .product-dropdown a:hover {
-      background: #f5f5f5;
-      color: #2a5f8a;
-      padding-left: 20px;
-    }
+  
 
     .line {
       border: none;
@@ -329,37 +224,6 @@
       margin: 0 auto;
     }
 
-    /* Quick Filters */
-    .quick-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 20px 0;
-    }
-
-    .quick-filter-btn {
-      padding: 8px 20px;
-      background: #f0f0f0;
-      border: 2px solid #e0e0e0;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      color: #333;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .quick-filter-btn:hover {
-      background: #e0e0e0;
-      border-color: #2a5f8a;
-      color: #2a5f8a;
-    }
-
-    .quick-filter-btn.active {
-      background: #2a5f8a;
-      border-color: #2a5f8a;
-      color: white;
-    }
-
     .category-section {
       margin: 50px 0;
     }
@@ -406,6 +270,9 @@
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
       transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
     }
 
     .product-card:hover {
@@ -537,53 +404,41 @@
     }
 
     /* Industrial Background Styles */
-.industrial-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  overflow: hidden;
-  background: #f5f7fa;
-}
+    .industrial-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      background: #f5f7fa;
+    }
 
-.pipe {
-  position: absolute;
-  background: rgba(58, 123, 213, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(58, 123, 213, 0.1);
-}
+    .pipe {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.1);
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(58, 123, 213, 0.1);
+    }
 
-.pipe-connector {
-  position: absolute;
-  background: rgba(58, 123, 213, 0.15);
-  border-radius: 50%;
-}
+    .pipe-connector {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.15);
+      border-radius: 50%;
+    }
 
-.particle {
-  position: absolute;
-  background: rgba(58, 123, 213, 0.2);
-  border-radius: 50%;
-}
+    .particle {
+      position: absolute;
+      background: rgba(58, 123, 213, 0.2);
+      border-radius: 50%;
+    }
 
+    /* Mobile menu styles */
     @media (max-width: 768px) {
-      nav {
-        flex-direction: column;
-        padding: 15px;
-        height: auto;
-        gap: 15px;
-      }
-
-      nav>ul {
-        margin-top: 15px;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
-      }
-
-      nav ul li {
-        margin: 5px 8px;
+     
+      .product-dropdown a {
+        padding-left: 30px;
       }
 
       .products-grid {
@@ -597,20 +452,6 @@
 
       .category-title h2 {
         font-size: 1.5rem;
-      }
-
-      .product-dropdown {
-        position: static;
-        box-shadow: none;
-        border-radius: 0;
-        display: none;
-        opacity: 1;
-        transform: none;
-        width: 100%;
-      }
-
-      .nav-product:hover .product-dropdown {
-        display: block;
       }
 
       .category-title .view-all {
@@ -661,7 +502,16 @@
     <a href="index.html">
       <img src="./Create_a_logo_concep-removebg-preview.png" alt="Damodar Traders Logo">
     </a>
-    <ul>
+    
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Navigation overlay -->
+    <div class="nav-overlay" id="navOverlay"></div>
+    
+    <ul id="navMenu">
       <li><a href="index.html">Home</a></li>
       <li class="nav-product">
         <a href="categories.html">Products</a>
@@ -685,7 +535,7 @@
 
   <hr class="line">
 
-  <!-- Add this right after <hr class="line"> -->
+  <!-- Industrial background -->
   <div class="industrial-background">
     <div class="pipes-container"></div>
     <div class="particles-container"></div>
@@ -711,15 +561,6 @@
         <button class="clear-search-button" id="clearSearchButton">
           Clear Search
         </button>
-      </div>
-
-      <!-- Quick Filters -->
-      <div class="quick-filters">
-        <button class="quick-filter-btn" data-category="pipes">Pipes</button>
-        <button class="quick-filter-btn" data-category="fittings">Fittings</button>
-        <button class="quick-filter-btn" data-category="valves">Valves</button>
-        <button class="quick-filter-btn" data-category="other">Other</button>
-        <button class="quick-filter-btn" data-discount="true">On Sale</button>
       </div>
 
       <!-- Search Results Info -->
@@ -787,724 +628,803 @@
     <button class="view-more-btn" id="viewMoreBtn">View More Products</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script>
-       
-        document.addEventListener('DOMContentLoaded', function() {
-  // Initialize industrial background
-  createIndustrialBackground();
-  
-  // Make background responsive to window resize
-  window.addEventListener('resize', () => {
+ <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+  // Mobile menu functionality
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const navMenu = document.getElementById('navMenu');
+  const navOverlay = document.getElementById('navOverlay');
+
+  // Check if elements exist before adding event listeners
+  if (mobileMenuBtn && navMenu && navOverlay) {
+    mobileMenuBtn.addEventListener('click', () => {
+      navMenu.classList.toggle('active');
+      navOverlay.classList.toggle('active');
+    });
+
+    navOverlay.addEventListener('click', () => {
+      navMenu.classList.remove('active');
+      navOverlay.classList.remove('active');
+    });
+
+    // Toggle product dropdown on mobile
+    const navProducts = document.querySelectorAll('.nav-product');
+    navProducts.forEach(item => {
+      item.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          item.classList.toggle('active');
+        }
+      });
+    });
+  }
+
+  // Industrial background animation
+  function createIndustrialBackground() {
+    const pipesContainer = document.querySelector('.pipes-container');
+    const particlesContainer = document.querySelector('.particles-container');
+    const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
+    
+    // Create horizontal pipes
+    for (let i = 0; i < 8; i++) {
+      const pipe = document.createElement('div');
+      pipe.className = 'pipe';
+      pipesContainer.appendChild(pipe);
+      
+      const isVertical = Math.random() > 0.5;
+      const duration = gsap.utils.random(30, 50);
+      const size = gsap.utils.random(10, 30);
+      const length = gsap.utils.random(200, 400);
+      
+      gsap.set(pipe, {
+        width: isVertical ? `${size}px` : `${length}px`,
+        height: isVertical ? `${length}px` : `${size}px`,
+        background: colors[Math.floor(Math.random() * colors.length)],
+        x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
+        y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
+      });
+      
+      gsap.to(pipe, {
+        x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
+        y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
+        duration: duration,
+        ease: "none",
+        repeat: -1
+      });
+    }
+    
+    // Create pipe connectors
+    for (let i = 0; i < 15; i++) {
+      const connector = document.createElement('div');
+      connector.className = 'pipe-connector';
+      pipesContainer.appendChild(connector);
+      
+      const size = gsap.utils.random(15, 40);
+      
+      gsap.set(connector, {
+        width: `${size}px`,
+        height: `${size}px`,
+        x: gsap.utils.random(0, window.innerWidth),
+        y: gsap.utils.random(0, window.innerHeight),
+        opacity: 0
+      });
+      
+      gsap.to(connector, {
+        opacity: 0.3,
+        duration: gsap.utils.random(3, 6),
+        yoyo: true,
+        repeat: -1,
+        delay: gsap.utils.random(0, 5)
+      });
+    }
+    
+    // Create floating particles (weld sparks)
+    for (let i = 0; i < 20; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      particlesContainer.appendChild(particle);
+      
+      const size = gsap.utils.random(2, 6);
+      
+      gsap.set(particle, {
+        width: `${size}px`,
+        height: `${size}px`,
+        x: gsap.utils.random(0, window.innerWidth),
+        y: gsap.utils.random(0, window.innerHeight),
+        opacity: 0
+      });
+      
+      // Spark animation
+      const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
+      tl.to(particle, {
+        opacity: 0.8,
+        duration: 0.3,
+        ease: "power1.out"
+      })
+      .to(particle, {
+        x: "+=50",
+        y: "+=50",
+        duration: 0.8,
+        ease: "power1.inOut"
+      })
+      .to(particle, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "power1.in"
+      });
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize industrial background
     if (document.querySelector('.pipes-container')) {
-      document.querySelector('.pipes-container').innerHTML = '';
-      document.querySelector('.particles-container').innerHTML = '';
       createIndustrialBackground();
     }
-  });
-});
+    
+    // Make background responsive to window resize
+    window.addEventListener('resize', () => {
+      if (document.querySelector('.pipes-container')) {
+        document.querySelector('.pipes-container').innerHTML = '';
+        document.querySelector('.particles-container').innerHTML = '';
+        createIndustrialBackground();
+      }
+    });
 
+    const API_BASE_URL = 'http://localhost:3000/api';
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = urlParams.get('category');
+    const showAll = urlParams.get('showAll');
+    const searchQuery = urlParams.get('search');
+    const defaultImage = "assets/Screenshot_2025-06-19_201249-removebg-preview.png";
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const API_BASE_URL = 'http://localhost:3000/api';
-      const urlParams = new URLSearchParams(window.location.search);
-      const category = urlParams.get('category');
-      const showAll = urlParams.get('showAll');
-      const searchQuery = urlParams.get('search');
-      const defaultImage = "assets/Screenshot_2025-06-19_201249-removebg-preview.png";
+    // Search state
+    let currentSearchQuery = searchQuery || '';
+    let debounceTimer;
 
+    // Store all products globally
+    let allProducts = [];
 
-
-      // Search state
-      let currentSearchQuery = searchQuery || '';
-      let isSearching = false;
-      let debounceTimer;
-
-      // If a specific category is selected, show only that category
-      if (category) {
-        document.querySelectorAll('.category-section').forEach(section => {
-          if (!section.id.startsWith(category)) {
-            section.style.display = 'none';
+    // If a specific category is selected, show only that category
+    if (category) {
+      document.querySelectorAll('.category-section').forEach(section => {
+        if (!section.id.startsWith(category)) {
+          section.style.display = 'none';
+        } else {
+          // Show the selected category section
+          section.style.display = 'block';
+        }
+      });
+      document.getElementById('viewMoreBtn').style.display = 'none';
+      
+      // Update page title for better UX
+      const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+      document.querySelector('.categories-header h1').textContent = `${categoryName} Products`;
+      document.querySelector('.categories-header p').textContent = `Browse our collection of high-quality ${categoryName.toLowerCase()}`;
+      
+      // Highlight the corresponding dropdown item
+      setTimeout(() => {
+        const dropdownLinks = document.querySelectorAll('.product-dropdown a');
+        dropdownLinks.forEach(link => {
+          if (link.getAttribute('href')?.includes(`category=${category}`)) {
+            link.style.fontWeight = 'bold';
+            link.style.color = '#2a5f8a';
           }
         });
-        document.getElementById('viewMoreBtn').style.display = 'none';
-        document.querySelector('.categories-header h1').textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Products`;
+      }, 100);
+    }
+
+    // More comprehensive fallback data
+    const fallbackProducts = [
+      {
+        _id: '1',
+        name: 'PVC Pipe',
+        category: 'pipes',
+        description: 'High-quality PVC pipe for industrial use',
+        image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: '1 inch', price: 150 }, { size: '2 inch', price: 250 }],
+        discount: 0,
+        material: 'PVC'
+      },
+      {
+        _id: '2',
+        name: 'Elbow Fitting',
+        category: 'fittings',
+        description: '90-degree elbow fitting for pipe connections',
+        image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: '1/2 inch', price: 45 }, { size: '3/4 inch', price: 60 }],
+        discount: 0,
+        material: 'Steel'
+      },
+      {
+        _id: '3',
+        name: 'Ball Valve',
+        category: 'valves',
+        description: 'Durable ball valve for fluid control',
+        image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: '1 inch', price: 120 }, { size: '2 inch', price: 200 }],
+        discount: 10,
+        material: 'Brass'
+      },
+      {
+        _id: '4',
+        name: 'Pipe Clamp',
+        category: 'other',
+        description: 'Sturdy pipe clamp for secure installations',
+        image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: 'Standard', price: 25 }],
+        discount: 0,
+        material: 'Steel'
+      },
+      {
+        _id: '5',
+        name: 'Copper Pipe',
+        category: 'pipes',
+        description: 'Premium copper pipe for plumbing applications',
+        image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: '1/2 inch', price: 300 }, { size: '1 inch', price: 550 }],
+        discount: 15,
+        material: 'Copper'
+      },
+      {
+        _id: '6',
+        name: 'Tee Fitting',
+        category: 'fittings',
+        description: 'T-shaped fitting for pipe connections',
+        image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: '1/2 inch', price: 35 }, { size: '3/4 inch', price: 50 }],
+        discount: 0,
+        material: 'Stainless Steel'
+      },
+      {
+        _id: '7',
+        name: 'Gate Valve',
+        category: 'valves',
+        description: 'Industrial gate valve for flow control',
+        image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: '1 inch', price: 180 }, { size: '2 inch', price: 320 }],
+        discount: 5,
+        material: 'Cast Iron'
+      },
+      {
+        _id: '8',
+        name: 'Pipe Insulation',
+        category: 'other',
+        description: 'Thermal insulation for pipes',
+        image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+        sizeOptions: [{ size: '1 inch', price: 45 }, { size: '2 inch', price: 75 }],
+        discount: 0,
+        material: 'Foam'
       }
+    ];
 
-      // More comprehensive fallback data
-      const fallbackProducts = [
-        {
-          _id: '1',
-          name: 'PVC Pipe',
-          category: 'pipes',
-          description: 'High-quality PVC pipe for industrial use',
-          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-          sizeOptions: [{ size: '1 inch', price: 150 }, { size: '2 inch', price: 250 }],
-          discount: 0,
-          material: 'PVC'
-        },
-        {
-          _id: '2',
-          name: 'Elbow Fitting',
-          category: 'fittings',
-          description: '90-degree elbow fitting for pipe connections',
-          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-          sizeOptions: [{ size: '1/2 inch', price: 45 }, { size: '3/4 inch', price: 60 }],
-          discount: 0,
-          material: 'Steel'
-        },
-        {
-          _id: '3',
-          name: 'Ball Valve',
-          category: 'valves',
-          description: 'Durable ball valve for fluid control',
-          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-          sizeOptions: [{ size: '1 inch', price: 120 }, { size: '2 inch', price: 200 }],
-          discount: 10,
-          material: 'Brass'
-        },
-        {
-          _id: '4',
-          name: 'Pipe Clamp',
-          category: 'other',
-          description: 'Sturdy pipe clamp for secure installations',
-          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-          sizeOptions: [{ size: 'Standard', price: 25 }],
-          discount: 0,
-          material: 'Steel'
-        },
-        {
-          _id: '5',
-          name: 'Copper Pipe',
-          category: 'pipes',
-          description: 'Premium copper pipe for plumbing applications',
-          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-          sizeOptions: [{ size: '1/2 inch', price: 300 }, { size: '1 inch', price: 550 }],
-          discount: 15,
-          material: 'Copper'
-        },
-        {
-          _id: '6',
-          name: 'Tee Fitting',
-          category: 'fittings',
-          description: 'T-shaped fitting for pipe connections',
-          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-          sizeOptions: [{ size: '1/2 inch', price: 35 }, { size: '3/4 inch', price: 50 }],
-          discount: 0,
-          material: 'Stainless Steel'
-        }
-      ];
-
-      // Load products with better error handling
-      async function loadProducts(searchTerm = '', categoryFilter = '') {
-        let products = [];
-
-        try {
-          // Show loading state
-          showLoadingState();
-
-          // Hide no search results message
-          document.getElementById('noSearchResults').style.display = 'none';
-
-          let endpoint = '/products';
-          let params = new URLSearchParams();
-
-          if (searchTerm) {
-            params.append('search', searchTerm);
-          }
-
-          if (categoryFilter) {
-            params.append('category', categoryFilter);
-          }
-
-          if (category) {
-            params.append('category', category);
-          }
-
-          if (params.toString()) {
-            endpoint = `/products/search?${params.toString()}`;
-          }
-
-          const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include'
-          });
-
-          if (!response.ok) {
-            throw new Error(`API request failed with status ${response.status}`);
-          }
-
-          const apiProducts = await response.json();
-
-          if (Array.isArray(apiProducts)) {
-            products = apiProducts;
-            localStorage.setItem('productDetails', JSON.stringify(products));
-          }
-        } catch (error) {
-          console.error('Error loading products:', error);
-          // If no products loaded yet, use fallback
-          if (products.length === 0) {
-            products = filterFallbackProducts(searchTerm, categoryFilter);
-            console.warn('Using fallback product data');
-          }
-        } finally {
-          displayProducts(products);
-
-          // Update search results info
-          if (searchTerm || categoryFilter) {
-            updateSearchResultsInfo(products.length, searchTerm);
-          }
-
-          hideLoadingState();
-        }
+    // Helper function to hide search suggestions
+    function hideSuggestions() {
+      const searchSuggestions = document.getElementById('searchSuggestions');
+      if (searchSuggestions) {
+        searchSuggestions.classList.remove('show');
+        searchSuggestions.innerHTML = '';
       }
+    }
 
-      // Filter fallback products based on search term
-      function filterFallbackProducts(searchTerm, categoryFilter) {
-        if (!searchTerm && !categoryFilter) {
-          return fallbackProducts;
+    // Load products with better error handling - FIXED FOR CATEGORY PARAMETER
+    async function loadProducts(searchTerm = '', categoryFilter = '') {
+      let products = [];
+
+      try {
+        // Show loading state
+        showLoadingState();
+
+        // Hide no search results message
+        document.getElementById('noSearchResults').style.display = 'none';
+
+        let endpoint = '/products';
+        let params = new URLSearchParams();
+
+        // IMPORTANT FIX: Use category parameter from URL if present
+        const activeCategory = category || categoryFilter;
+        
+        if (searchTerm) {
+          params.append('search', searchTerm);
         }
 
-        const searchTermLower = searchTerm.toLowerCase();
+        if (activeCategory) {
+          params.append('category', activeCategory);
+        }
 
-        return fallbackProducts.filter(product => {
-          const matchesSearch = !searchTerm ||
-            product.name.toLowerCase().includes(searchTermLower) ||
-            product.category.toLowerCase().includes(searchTermLower) ||
-            product.description.toLowerCase().includes(searchTermLower) ||
-            product.material.toLowerCase().includes(searchTermLower);
+        if (params.toString()) {
+          endpoint = `/products/search?${params.toString()}`;
+        }
 
-          const matchesCategory = !categoryFilter ||
-            product.category.toLowerCase() === categoryFilter.toLowerCase();
+        console.log('Fetching from:', `${API_BASE_URL}${endpoint}`);
 
-          return matchesSearch && matchesCategory;
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include'
         });
-      }
 
-      function showLoadingState() {
-        // Show loading in all grids
-        document.querySelectorAll('.products-grid').forEach(grid => {
-          if (!grid.querySelector('.loading-spinner')) {
-            const loadingSpinner = document.createElement('div');
-            loadingSpinner.className = 'loading-spinner';
-            loadingSpinner.innerHTML = `
-              <div class="spinner"></div>
-              <p>Loading products...</p>
-            `;
-            grid.innerHTML = '';
-            grid.appendChild(loadingSpinner);
-          }
-        });
-      }
-
-      function hideLoadingState() {
-        // Remove loading spinners
-        document.querySelectorAll('.loading-spinner').forEach(spinner => {
-          spinner.remove();
-        });
-      }
-
-      function displayProducts(products) {
-        if (!products || !Array.isArray(products)) {
-          showErrorMessage('Invalid product data received');
-          return;
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
         }
 
+        const apiProducts = await response.json();
+
+        if (Array.isArray(apiProducts)) {
+          products = apiProducts;
+          // Store products for filtering
+          allProducts = products;
+          localStorage.setItem('productDetails', JSON.stringify(products));
+        }
+      } catch (error) {
+        console.error('Error loading products:', error);
+        // If no products loaded yet, use fallback
         if (products.length === 0) {
-          if (currentSearchQuery) {
-            // Show no search results message
-            document.getElementById('noSearchResults').style.display = 'block';
-            document.querySelectorAll('.category-section').forEach(section => {
-              section.style.display = 'none';
-            });
-            document.getElementById('viewMoreBtn').style.display = 'none';
-          } else {
-            showErrorMessage('No products available');
-          }
-          return;
-        } else {
-          // Hide no search results message
-          document.getElementById('noSearchResults').style.display = 'none';
+          products = filterFallbackProducts(searchTerm, category || categoryFilter);
+          allProducts = products;
+          console.warn('Using fallback product data');
+        }
+      } finally {
+        displayProducts(products);
 
-          // Show all category sections if not searching
-          if (!currentSearchQuery && !category) {
-            document.querySelectorAll('.category-section').forEach(section => {
-              section.style.display = 'block';
-            });
-            document.getElementById('viewMoreBtn').style.display = 'block';
-          }
+        // Update search results info
+        if (searchTerm || category || categoryFilter) {
+          const filterType = category || categoryFilter || searchTerm;
+          updateSearchResultsInfo(products.length, filterType);
         }
 
-        // Group products by category
-        const productsByCategory = {
-          pipes: [],
-          fittings: [],
-          valves: [],
-          other: []
-        };
+        hideLoadingState();
+      }
+    }
 
-        products.forEach(product => {
-          const productCategory = product.category?.toLowerCase() || 'other';
-          if (productsByCategory[productCategory]) {
-            productsByCategory[productCategory].push(product);
-          } else {
-            productsByCategory.other.push(product);
-          }
-        });
+    // Filter fallback products based on search term
+    function filterFallbackProducts(searchTerm, categoryFilter) {
+      if (!searchTerm && !categoryFilter) {
+        return fallbackProducts;
+      }
 
-        // Display products in their respective sections
-        for (const [cat, categoryProducts] of Object.entries(productsByCategory)) {
-          const gridElement = document.getElementById(`${cat}-grid`);
-          if (!gridElement) continue;
+      const searchTermLower = searchTerm ? searchTerm.toLowerCase() : '';
+      const categoryFilterLower = categoryFilter ? categoryFilter.toLowerCase() : '';
 
-          gridElement.innerHTML = '';
+      return fallbackProducts.filter(product => {
+        const matchesSearch = !searchTerm ||
+          product.name.toLowerCase().includes(searchTermLower) ||
+          product.category.toLowerCase().includes(searchTermLower) ||
+          product.description.toLowerCase().includes(searchTermLower) ||
+          product.material.toLowerCase().includes(searchTermLower);
 
-          // Determine how many products to show
-          const productsToShow = (showAll || window.location.search.includes('category') || currentSearchQuery) ?
-            categoryProducts :
-            categoryProducts.slice(0, 4);
+        const matchesCategory = !categoryFilter ||
+          product.category.toLowerCase() === categoryFilterLower;
 
-          if (productsToShow.length === 0) {
-            gridElement.innerHTML = '<div class="no-products">No products available in this category</div>';
-            continue;
-          }
+        return matchesSearch && matchesCategory;
+      });
+    }
 
-          productsToShow.forEach(product => {
-            const productCard = createProductCard(product);
-            gridElement.appendChild(productCard);
+    function showLoadingState() {
+      // Show loading in all grids
+      document.querySelectorAll('.products-grid').forEach(grid => {
+        if (!grid.querySelector('.loading-spinner')) {
+          const loadingSpinner = document.createElement('div');
+          loadingSpinner.className = 'loading-spinner';
+          loadingSpinner.innerHTML = `
+            <div class="spinner"></div>
+            <p>Loading products...</p>
+          `;
+          grid.innerHTML = '';
+          grid.appendChild(loadingSpinner);
+        }
+      });
+    }
+
+    function hideLoadingState() {
+      // Remove loading spinners
+      document.querySelectorAll('.loading-spinner').forEach(spinner => {
+        spinner.remove();
+      });
+    }
+
+    function displayProducts(products) {
+      if (!products || !Array.isArray(products)) {
+        showErrorMessage('Invalid product data received');
+        return;
+      }
+
+      if (products.length === 0) {
+        if (currentSearchQuery || category) {
+          // Show no search results message
+          document.getElementById('noSearchResults').style.display = 'block';
+          document.getElementById('noSearchResults').innerHTML = `
+            <i class="fas fa-search"></i>
+            <h3>No ${category ? category + ' ' : ''}products found${currentSearchQuery ? ` for "${currentSearchQuery}"` : ''}</h3>
+            <p>Try adjusting your search terms or browse other categories</p>
+          `;
+          
+          // Hide all sections except the no results message
+          document.querySelectorAll('.category-section').forEach(section => {
+            section.style.display = 'none';
           });
-        }
-      }
-
-      function createProductCard(product) {
-        const productCard = document.createElement('a');
-        productCard.href = `product-details.html?id=${product._id}`;
-        productCard.className = 'product-card';
-
-        // Product image
-        const productImage = document.createElement('div');
-        productImage.className = 'product-image';
-        const img = document.createElement('img');
-        img.src = product.image || product.imagePath || defaultImage;
-        img.alt = product.name || 'Product Image';
-        img.loading = "lazy";
-        img.onerror = function () {
-          this.src = defaultImage;
-        };
-        productImage.appendChild(img);
-
-        // Product info
-        const productInfo = document.createElement('div');
-        productInfo.className = 'product-info';
-
-        const productName = document.createElement('h3');
-        productName.className = 'product-name';
-        productName.textContent = product.name || 'Unnamed Product';
-
-        const productPrice = document.createElement('div');
-        productPrice.className = 'product-price';
-
-        // Get the first available price if sizeOptions exist
-        let price = 0;
-        if (product.sizeOptions && product.sizeOptions.length > 0 && product.sizeOptions[0].price) {
-          price = product.sizeOptions[0].price;
-        }
-
-        if (price > 0) {
-          const currentPrice = document.createElement('span');
-          currentPrice.className = 'current-price';
-
-          if (product.discount && product.discount > 0) {
-            const discountedPrice = price * (1 - product.discount / 100);
-            currentPrice.textContent = `₹${discountedPrice.toFixed(2)}`;
-
-            const originalPrice = document.createElement('span');
-            originalPrice.className = 'original-price';
-            originalPrice.textContent = `₹${price.toFixed(2)}`;
-
-            const discountBadge = document.createElement('span');
-            discountBadge.className = 'discount-badge';
-            discountBadge.textContent = `${product.discount}% OFF`;
-
-            productPrice.appendChild(originalPrice);
-            productPrice.appendChild(currentPrice);
-            productPrice.appendChild(discountBadge);
-          } else {
-            currentPrice.textContent = `₹${price.toFixed(2)}`;
-            productPrice.appendChild(currentPrice);
-          }
+          document.getElementById('viewMoreBtn').style.display = 'none';
         } else {
-          const priceText = document.createElement('span');
-          priceText.textContent = 'Price on request';
-          productPrice.appendChild(priceText);
+          showErrorMessage('No products available at the moment. Please check back later.');
+        }
+        return;
+      } else {
+        // Hide no search results message
+        document.getElementById('noSearchResults').style.display = 'none';
+      }
+
+      // Group products by category
+      const productsByCategory = {
+        pipes: [],
+        fittings: [],
+        valves: [],
+        other: []
+      };
+
+      products.forEach(product => {
+        const productCategory = product.category?.toLowerCase() || 'other';
+        if (productsByCategory[productCategory]) {
+          productsByCategory[productCategory].push(product);
+        } else {
+          productsByCategory.other.push(product);
+        }
+      });
+
+      // Display products in their respective sections
+      for (const [cat, categoryProducts] of Object.entries(productsByCategory)) {
+        const gridElement = document.getElementById(`${cat}-grid`);
+        const sectionElement = document.getElementById(`${cat}-section`);
+        
+        if (!gridElement) continue;
+
+        gridElement.innerHTML = '';
+
+        // Determine how many products to show
+        // If we're viewing a specific category or searching, show all products
+        const productsToShow = (showAll || category || currentSearchQuery) ?
+          categoryProducts :
+          categoryProducts.slice(0, 4);
+
+        if (productsToShow.length === 0) {
+          gridElement.innerHTML = '<div class="no-products">No products available in this category</div>';
+          if (sectionElement && (category || currentSearchQuery)) {
+            sectionElement.style.display = 'none';
+          }
+          continue;
         }
 
-        const productCategory = document.createElement('span');
-        productCategory.className = 'product-category';
-        productCategory.textContent = product.category ?
-          product.category.charAt(0).toUpperCase() + product.category.slice(1) :
-          'Other';
+        // Show the section if it has products
+        if (sectionElement) {
+          sectionElement.style.display = 'block';
+        }
 
-        productInfo.appendChild(productName);
-        productInfo.appendChild(productPrice);
-        productInfo.appendChild(productCategory);
+        productsToShow.forEach(product => {
+          const productCard = createProductCard(product);
+          gridElement.appendChild(productCard);
+        });
+      }
+      
+      // Show all sections if not searching and no specific category selected
+      if (!currentSearchQuery && !category) {
+        document.querySelectorAll('.category-section').forEach(section => {
+          section.style.display = 'block';
+        });
+        document.getElementById('viewMoreBtn').style.display = 'block';
+      } else {
+        document.getElementById('viewMoreBtn').style.display = 'none';
+      }
+    }
 
-        productCard.appendChild(productImage);
-        productCard.appendChild(productInfo);
+    function createProductCard(product) {
+      const productCard = document.createElement('a');
+      productCard.href = `product-details.html?id=${product._id}`;
+      productCard.className = 'product-card';
 
-        return productCard;
+      // Product image
+      const productImage = document.createElement('div');
+      productImage.className = 'product-image';
+      const img = document.createElement('img');
+      img.src = product.image || product.imagePath || defaultImage;
+      img.alt = product.name || 'Product Image';
+      img.loading = "lazy";
+      img.onerror = function () {
+        this.src = defaultImage;
+      };
+      productImage.appendChild(img);
+
+      // Product info
+      const productInfo = document.createElement('div');
+      productInfo.className = 'product-info';
+
+      const productName = document.createElement('h3');
+      productName.className = 'product-name';
+      productName.textContent = product.name || 'Unnamed Product';
+
+      const productPrice = document.createElement('div');
+      productPrice.className = 'product-price';
+
+      // Get the first available price if sizeOptions exist
+      let price = 0;
+      if (product.sizeOptions && product.sizeOptions.length > 0 && product.sizeOptions[0].price) {
+        price = product.sizeOptions[0].price;
       }
 
-      function showErrorMessage(message) {
-        const header = document.querySelector('.categories-header');
-        if (!header) return;
+      if (price > 0) {
+        const currentPrice = document.createElement('span');
+        currentPrice.className = 'current-price';
 
-        const errorElement = document.createElement('p');
-        errorElement.style.textAlign = 'center';
-        errorElement.style.padding = '20px';
-        errorElement.style.color = '#e63946';
-        errorElement.textContent = message;
+        if (product.discount && product.discount > 0) {
+          const discountedPrice = price * (1 - product.discount / 100);
+          currentPrice.textContent = `₹${discountedPrice.toFixed(2)}`;
 
-        header.appendChild(errorElement);
+          const originalPrice = document.createElement('span');
+          originalPrice.className = 'original-price';
+          originalPrice.textContent = `₹${price.toFixed(2)}`;
+
+          const discountBadge = document.createElement('span');
+          discountBadge.className = 'discount-badge';
+          discountBadge.textContent = `${product.discount}% OFF`;
+
+          productPrice.appendChild(originalPrice);
+          productPrice.appendChild(currentPrice);
+          productPrice.appendChild(discountBadge);
+        } else {
+          currentPrice.textContent = `₹${price.toFixed(2)}`;
+          productPrice.appendChild(currentPrice);
+        }
+      } else {
+        const priceText = document.createElement('span');
+        priceText.textContent = 'Price on request';
+        productPrice.appendChild(priceText);
       }
 
-      function updateSearchResultsInfo(count, searchTerm) {
-        const resultsInfo = document.getElementById('searchResultsInfo');
-        const resultsCount = document.getElementById('resultsCount');
+      const productCategory = document.createElement('span');
+      productCategory.className = 'product-category';
+      productCategory.textContent = product.category ?
+        product.category.charAt(0).toUpperCase() + product.category.slice(1) :
+        'Other';
 
-        if (count > 0) {
-          resultsInfo.style.display = 'block';
+      productInfo.appendChild(productName);
+      productInfo.appendChild(productPrice);
+      productInfo.appendChild(productCategory);
+
+      productCard.appendChild(productImage);
+      productCard.appendChild(productInfo);
+
+      return productCard;
+    }
+
+    function showErrorMessage(message) {
+      const header = document.querySelector('.categories-header');
+      if (!header) return;
+
+      const errorElement = document.createElement('p');
+      errorElement.style.textAlign = 'center';
+      errorElement.style.padding = '20px';
+      errorElement.style.color = '#e63946';
+      errorElement.textContent = message;
+
+      header.appendChild(errorElement);
+    }
+
+    function updateSearchResultsInfo(count, searchTerm) {
+      const resultsInfo = document.getElementById('searchResultsInfo');
+      const resultsCount = document.getElementById('resultsCount');
+
+      if (count > 0) {
+        resultsInfo.style.display = 'block';
+        if (category && !currentSearchQuery) {
+          resultsCount.textContent = `Found ${count} ${searchTerm} product${count !== 1 ? 's' : ''}`;
+        } else {
           resultsCount.textContent = `Found ${count} product${count !== 1 ? 's' : ''} for "${searchTerm}"`;
-        } else {
-          resultsInfo.style.display = 'none';
         }
+      } else {
+        resultsInfo.style.display = 'none';
+      }
+    }
+
+    // Search functionality
+    function setupSearch() {
+      const searchInput = document.getElementById('searchInput');
+      const searchButton = document.getElementById('searchButton');
+      const clearSearchButton = document.getElementById('clearSearchButton');
+      const searchSuggestions = document.getElementById('searchSuggestions');
+
+      // Set initial search value from URL
+      if (currentSearchQuery) {
+        searchInput.value = currentSearchQuery;
+        document.getElementById('searchResultsInfo').style.display = 'block';
+        document.getElementById('resultsCount').textContent = `Searching for "${currentSearchQuery}"...`;
       }
 
-      // Search functionality
-      function setupSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
-        const clearSearchButton = document.getElementById('clearSearchButton');
-        const searchSuggestions = document.getElementById('searchSuggestions');
+      // Search on button click
+      searchButton.addEventListener('click', () => {
+        performSearch();
+      });
 
-        // Set initial search value from URL
-        if (currentSearchQuery) {
-          searchInput.value = currentSearchQuery;
-          document.getElementById('searchResultsInfo').style.display = 'block';
-          document.getElementById('resultsCount').textContent = `Searching for "${currentSearchQuery}"...`;
+      // Search on Enter key
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          performSearch();
+        }
+      });
+
+      // Real-time search suggestions
+      searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        const query = searchInput.value.trim();
+
+        if (query.length < 2) {
+          hideSuggestions();
+          return;
         }
 
-        // Search on button click
-        searchButton.addEventListener('click', () => {
-          performSearch();
-        });
+        debounceTimer = setTimeout(async () => {
+          try {
+            const response = await fetch(
+              `${API_BASE_URL}/products/search/suggestions?query=${encodeURIComponent(query)}`
+            );
 
-        // Search on Enter key
-        searchInput.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter') {
-            performSearch();
-          }
-        });
-
-        // Real-time search suggestions
-        searchInput.addEventListener('input', () => {
-          clearTimeout(debounceTimer);
-          const query = searchInput.value.trim();
-
-          if (query.length < 2) {
-            hideSuggestions();
-            return;
-          }
-
-          debounceTimer = setTimeout(async () => {
-            try {
-              const response = await fetch(
-                `${API_BASE_URL}/products/search/suggestions?query=${encodeURIComponent(query)}`
-              );
-
-              if (response.ok) {
-                const suggestions = await response.json();
-                showSuggestions(suggestions, query);
-              }
-            } catch (error) {
-              console.error('Error fetching suggestions:', error);
+            if (response.ok) {
+              const suggestions = await response.json();
+              showSuggestions(suggestions, query);
             }
-          }, 300);
-        });
+          } catch (error) {
+            console.error('Error fetching suggestions:', error);
+          }
+        }, 300);
+      });
 
-        // Clear search
-        clearSearchButton.addEventListener('click', () => {
-          searchInput.value = '';
-          currentSearchQuery = '';
-          hideSuggestions();
-          document.getElementById('searchResultsInfo').style.display = 'none';
-          document.getElementById('noSearchResults').style.display = 'none';
+      // Clear search
+      clearSearchButton.addEventListener('click', () => {
+        searchInput.value = '';
+        currentSearchQuery = '';
+        hideSuggestions();
+        document.getElementById('searchResultsInfo').style.display = 'none';
+        document.getElementById('noSearchResults').style.display = 'none';
+        
+        // If we were on a category page, keep showing that category
+        if (category) {
+          // Show only the category section
+          document.querySelectorAll('.category-section').forEach(section => {
+            if (section.id.startsWith(category)) {
+              section.style.display = 'block';
+            } else {
+              section.style.display = 'none';
+            }
+          });
+          document.getElementById('viewMoreBtn').style.display = 'none';
+          
+          // Load products for the category
+          loadProducts('', category);
+        } else {
+          // Show all sections
           document.querySelectorAll('.category-section').forEach(section => {
             section.style.display = 'block';
           });
           document.getElementById('viewMoreBtn').style.display = 'block';
-
-          // Reset quick filter buttons
-          document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-          });
-
-          // Update URL
-          updateURL();
+          
+          // Load all products
           loadProducts();
-        });
-
-        // Close suggestions when clicking outside
-        document.addEventListener('click', (e) => {
-          if (!e.target.closest('.search-input-wrapper')) {
-            hideSuggestions();
-          }
-        });
-
-        function performSearch() {
-          const query = searchInput.value.trim();
-          currentSearchQuery = query;
-
-          if (query) {
-            loadProducts(query);
-            updateURL();
-            hideSuggestions();
-          } else {
-            // If search is empty, load all products
-            currentSearchQuery = '';
-            document.getElementById('searchResultsInfo').style.display = 'none';
-            document.getElementById('noSearchResults').style.display = 'none';
-            loadProducts();
-            updateURL();
-          }
         }
 
-        function showSuggestions(suggestions, query) {
-          if (!suggestions || suggestions.length === 0) {
-            hideSuggestions();
-            return;
-          }
-
-          searchSuggestions.innerHTML = '';
-
-          suggestions.forEach(suggestion => {
-            const suggestionItem = document.createElement('div');
-            suggestionItem.className = 'suggestion-item';
-
-            suggestionItem.innerHTML = `
-              <div class="suggestion-name">${highlightText(suggestion.name, query)}</div>
-              <div class="suggestion-category">${suggestion.category || 'Product'}</div>
-            `;
-
-            suggestionItem.addEventListener('click', () => {
-              searchInput.value = suggestion.name;
-              performSearch();
-            });
-
-            searchSuggestions.appendChild(suggestionItem);
-          });
-
-          searchSuggestions.classList.add('show');
-        }
-
-        function hideSuggestions() {
-          searchSuggestions.classList.remove('show');
-          searchSuggestions.innerHTML = '';
-        }
-
-        function highlightText(text, query) {
-          if (!query) return text;
-
-          const regex = new RegExp(`(${query})`, 'gi');
-          return text.replace(regex, '<mark>$1</mark>');
-        }
-      }
-
-      // Quick filter functionality
-      function setupQuickFilters() {
-        document.querySelectorAll('.quick-filter-btn').forEach(button => {
-          button.addEventListener('click', () => {
-            const category = button.getAttribute('data-category');
-            const discount = button.getAttribute('data-discount');
-
-            // Toggle active state
-            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
-              btn.classList.remove('active');
-            });
-            button.classList.add('active');
-
-            if (category) {
-              // Filter by category
-              currentSearchQuery = '';
-              document.getElementById('searchInput').value = '';
-              hideSuggestions();
-              document.getElementById('searchResultsInfo').style.display = 'block';
-              document.getElementById('resultsCount').textContent = `Showing ${category} products`;
-
-              // Show only the selected category section
-              document.querySelectorAll('.category-section').forEach(section => {
-                if (section.id.startsWith(category)) {
-                  section.style.display = 'block';
-                } else {
-                  section.style.display = 'none';
-                }
-              });
-
-              document.getElementById('viewMoreBtn').style.display = 'none';
-              loadProducts('', category);
-            } else if (discount) {
-              // Filter products with discount
-              currentSearchQuery = '';
-              document.getElementById('searchInput').value = '';
-              hideSuggestions();
-              document.getElementById('searchResultsInfo').style.display = 'block';
-              document.getElementById('resultsCount').textContent = 'Showing products on sale';
-
-              // Show all sections
-              document.querySelectorAll('.category-section').forEach(section => {
-                section.style.display = 'block';
-              });
-
-              document.getElementById('viewMoreBtn').style.display = 'none';
-
-              // Filter fallback products with discount
-              const discountedProducts = fallbackProducts.filter(product => product.discount > 0);
-              displayProducts(discountedProducts);
-              updateSearchResultsInfo(discountedProducts.length, 'on sale');
-            }
-          });
-        });
-      }
-
-      function updateURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-
-        if (currentSearchQuery) {
-          urlParams.set('search', currentSearchQuery);
-        } else {
-          urlParams.delete('search');
-        }
-
-        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
-        window.history.replaceState({}, '', newUrl);
-      }
-
-      // View more button functionality
-      document.getElementById('viewMoreBtn').addEventListener('click', function () {
-        window.location.href = 'categories.html?showAll=true';
+        // Update URL
+        updateURL();
       });
 
-      // Initialize
-      setupSearch();
-      setupQuickFilters();
+      // Close suggestions when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-input-wrapper')) {
+          hideSuggestions();
+        }
+      });
 
-      // Load products with initial search if present
-      if (currentSearchQuery) {
-        loadProducts(currentSearchQuery);
-      } else {
-        loadProducts();
+      function performSearch() {
+        const query = searchInput.value.trim();
+        currentSearchQuery = query;
+
+        if (query) {
+          // If we're on a category page, search within that category
+          if (category) {
+            loadProducts(query, category);
+          } else {
+            loadProducts(query);
+          }
+          updateURL();
+          hideSuggestions();
+        } else {
+          // If search is empty, load products based on current view
+          currentSearchQuery = '';
+          document.getElementById('searchResultsInfo').style.display = 'none';
+          document.getElementById('noSearchResults').style.display = 'none';
+          
+          if (category) {
+            loadProducts('', category);
+          } else {
+            loadProducts();
+          }
+          updateURL();
+        }
       }
+
+      function showSuggestions(suggestions, query) {
+        if (!suggestions || suggestions.length === 0) {
+          hideSuggestions();
+          return;
+        }
+
+        searchSuggestions.innerHTML = '';
+
+        suggestions.forEach(suggestion => {
+          const suggestionItem = document.createElement('div');
+          suggestionItem.className = 'suggestion-item';
+
+          suggestionItem.innerHTML = `
+            <div class="suggestion-name">${highlightText(suggestion.name, query)}</div>
+            <div class="suggestion-category">${suggestion.category || 'Product'}</div>
+          `;
+
+          suggestionItem.addEventListener('click', () => {
+            searchInput.value = suggestion.name;
+            performSearch();
+          });
+
+          searchSuggestions.appendChild(suggestionItem);
+        });
+
+        searchSuggestions.classList.add('show');
+      }
+
+      function highlightText(text, query) {
+        if (!query) return text;
+
+        const regex = new RegExp(`(${query})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+      }
+    }
+
+    function updateURL() {
+      const urlParams = new URLSearchParams(window.location.search);
+
+      if (currentSearchQuery) {
+        urlParams.set('search', currentSearchQuery);
+      } else {
+        urlParams.delete('search');
+      }
+
+      // Keep category parameter if present
+      if (category) {
+        urlParams.set('category', category);
+      }
+
+      const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+
+    // View more button functionality
+    document.getElementById('viewMoreBtn').addEventListener('click', function () {
+      window.location.href = 'categories.html?showAll=true';
     });
 
-    // Industrial Pipe Background Animation (same as index.html)
-function createIndustrialBackground() {
-  const pipesContainer = document.querySelector('.pipes-container');
-  const particlesContainer = document.querySelector('.particles-container');
-  const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
-  
-  // Create horizontal pipes
-  for (let i = 0; i < 8; i++) {
-    const pipe = document.createElement('div');
-    pipe.className = 'pipe';
-    pipesContainer.appendChild(pipe);
-    
-    const isVertical = Math.random() > 0.5;
-    const duration = gsap.utils.random(30, 50);
-    const size = gsap.utils.random(10, 30);
-    const length = gsap.utils.random(200, 400);
-    
-    gsap.set(pipe, {
-      width: isVertical ? `${size}px` : `${length}px`,
-      height: isVertical ? `${length}px` : `${size}px`,
-      background: colors[Math.floor(Math.random() * colors.length)],
-      x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
-      y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
-    });
-    
-    gsap.to(pipe, {
-      x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
-      y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
-      duration: duration,
-      ease: "none",
-      repeat: -1
-    });
-  }
-  
-  // Create pipe connectors
-  for (let i = 0; i < 15; i++) {
-    const connector = document.createElement('div');
-    connector.className = 'pipe-connector';
-    pipesContainer.appendChild(connector);
-    
-    const size = gsap.utils.random(15, 40);
-    
-    gsap.set(connector, {
-      width: `${size}px`,
-      height: `${size}px`,
-      x: gsap.utils.random(0, window.innerWidth),
-      y: gsap.utils.random(0, window.innerHeight),
-      opacity: 0
-    });
-    
-    gsap.to(connector, {
-      opacity: 0.3,
-      duration: gsap.utils.random(3, 6),
-      yoyo: true,
-      repeat: -1,
-      delay: gsap.utils.random(0, 5)
-    });
-  }
-  
-  // Create floating particles (weld sparks)
-  for (let i = 0; i < 20; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particlesContainer.appendChild(particle);
-    
-    const size = gsap.utils.random(2, 6);
-    
-    gsap.set(particle, {
-      width: `${size}px`,
-      height: `${size}px`,
-      x: gsap.utils.random(0, window.innerWidth),
-      y: gsap.utils.random(0, window.innerHeight),
-      opacity: 0
-    });
-    
-    // Spark animation
-    const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
-    tl.to(particle, {
-      opacity: 0.8,
-      duration: 0.3,
-      ease: "power1.out"
-    })
-    .to(particle, {
-      x: "+=50",
-      y: "+=50",
-      duration: 0.8,
-      ease: "power1.inOut"
-    })
-    .to(particle, {
-      opacity: 0,
-      duration: 0.3,
-      ease: "power1.in"
-    });
-  }
-}
-  </script>
+    // Initialize
+    setupSearch();
+
+    // Load products with initial parameters
+    if (currentSearchQuery && category) {
+      // Both search and category parameters
+      loadProducts(currentSearchQuery, category);
+    } else if (currentSearchQuery) {
+      // Only search parameter
+      loadProducts(currentSearchQuery);
+    } else if (category) {
+      // Only category parameter - THIS WAS THE FIX
+      loadProducts('', category);
+    } else {
+      // No parameters, load all products
+      loadProducts();
+    }
+  });
+</script>
 </body>
-
 </html>
