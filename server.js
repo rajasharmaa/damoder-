@@ -12,24 +12,12 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ==================== FIX: HANDLE OPTIONS REQUESTS FIRST ====================
-
-// Handle all OPTIONS requests first
-app.options('*', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', req.headers.origin || 'http://localhost:3000');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.status(200).end();
-});
-
 // CORS configuration
 app.use(cors({
   origin: ['http://localhost:3000', 'http://127.0.0.1:5500', 'http://localhost:3001','http://localhost:8080'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  preflightContinue: false  // Important: Don't pass to next middleware
+  credentials: true
 }));
 
 // Middleware
@@ -40,7 +28,6 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'user123',
   resave: true,
   saveUninitialized: false,
-  store: new session.MemoryStore(), // Explicitly use memory store
   cookie: { 
     secure: false,
     httpOnly: true,
@@ -841,12 +828,6 @@ app.get('/api/health', (req, res) => {
       'password-reset'
     ]
   });
-});
-
-// ==================== CATCH-ALL ROUTE FOR SPA ====================
-// This should be after all your API routes
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // ==================== SERVER STARTUP ====================
