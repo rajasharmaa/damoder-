@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 3000;
 
 // CORS configuration
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://damoder-traders.vercel.app', 'http://localhost:3001','http://localhost:8080'],
+  origin: ['http://localhost:3000', 'https://damoder-traders.vercel.app', 'http://localhost:3001','http://localhost:8080','https://damoder-traders-x2iy.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
