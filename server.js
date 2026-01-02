@@ -8,32 +8,72 @@ const cookieParser = require('cookie-parser');
 const { connectToDB } = require('./database');
 const { ObjectId } = require('mongodb');
 const crypto = require('crypto');
+const MongoStore = require('connect-mongo');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration
+// Determine environment
+const isProduction = process.env.NODE_ENV === 'production';
+const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+
+console.log('Environment:', isProduction ? 'Production' : 'Development');
+console.log('Frontend URL:', frontendUrl);
+
+// CORS configuration - Enhanced for cross-origin
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://damoder-traders.vercel.app', 'http://localhost:3001','http://localhost:8080','https://damoder-traders-x2iy.vercel.app'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, postman)
+    if (!origin && !isProduction) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://127.0.0.1:5500',
+      'http://localhost:8080',
+      frontendUrl
+    ].filter(Boolean);
+    
+    if (!origin || allowedOrigins.indexOf(origin) !== -1 || !isProduction) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['set-cookie'],
+  credentials: true,
+  maxAge: 86400 // 24 hours
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Session configuration - Fixed for cross-origin
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'user123',
-  resave: true,
+  secret: process.env.SESSION_SECRET || 'your-strong-secret-key-here-change-in-production',
+  resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || "mongodb+srv://rajat888sharma111_db_user:rajat888@cluster0.c6jicll.mongodb.net/?appName=Cluster0",
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // 24 hours
+    autoRemove: 'native'
+  }),
   cookie: { 
-    secure: false,
+    secure: isProduction, // Production mein true, local mein false
     httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60 * 1000
-  }
+    sameSite: isProduction ? 'none' : 'lax', // Production mein 'none'
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: isProduction ? '.onrender.com' : undefined
+  },
+  name: 'damodar.sid' // Unique session name
 }));
 
 // Static files
@@ -49,9 +89,15 @@ function isValidObjectId(id) {
 function requireUserAuth(req, res, next) {
   if (!req.session.user) {
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ 
+        authenticated: false,
+        error: 'Please login first' 
+      });
     }
-    return res.status(401).json({ error: 'Please login first' });
+    return res.status(401).json({ 
+      authenticated: false,
+      error: 'Please login first' 
+    });
   }
   next();
 }
@@ -62,6 +108,10 @@ app.get('/api/auth/status', (req, res) => {
   console.log('Session ID:', req.sessionID);
   console.log('Session user:', req.session.user);
   console.log('Cookies:', req.cookies);
+  
+  // Set CORS headers explicitly
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', req.headers.origin || frontendUrl);
   
   if (req.session.user) {
     res.json({ 
@@ -75,7 +125,10 @@ app.get('/api/auth/status', (req, res) => {
     });
   } else {
     console.log('No user in session, returning unauthenticated');
-    res.json({ authenticated: false });
+    res.json({ 
+      authenticated: false,
+      user: null 
+    });
   }
 });
 
@@ -113,19 +166,32 @@ app.post('/api/auth/register', async (req, res) => {
     
     // Create session
     req.session.user = {
-      id: result.insertedId,
+      id: result.insertedId.toString(),
       email: newUser.email,
       name: newUser.name,
       role: 'user'
     };
     
-    res.status(201).json({ 
-      message: 'Registration successful',
-      user: {
-        id: result.insertedId,
-        name: newUser.name,
-        email: newUser.email
+    // Save session
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Session creation failed' });
       }
+      
+      // Set CORS headers
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Origin', req.headers.origin || frontendUrl);
+      
+      res.status(201).json({ 
+        message: 'Registration successful',
+        authenticated: true,
+        user: {
+          id: result.insertedId.toString(),
+          name: newUser.name,
+          email: newUser.email
+        }
+      });
     });
   } catch (err) {
     console.error('Registration error:', err);
@@ -147,46 +213,87 @@ app.post('/api/auth/login', async (req, res) => {
     // Find user
     const user = await usersCollection.findOne({ email });
     if (!user) {
-      return res.status(401).json({ error: 'User not found. Please register first.' });
+      return res.status(401).json({ 
+        authenticated: false,
+        error: 'User not found. Please register first.' 
+      });
     }
     
     // Check password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid password. Please try again.' });
+      return res.status(401).json({ 
+        authenticated: false,
+        error: 'Invalid password. Please try again.' 
+      });
     }
     
     // Create session
     req.session.user = {
-      id: user._id,
+      id: user._id.toString(),
       email: user.email,
       name: user.name,
       role: user.role
     };
     
-    res.json({ 
-      message: 'Login successful',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone
+    // Save session
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ 
+          authenticated: false,
+          error: 'Session creation failed' 
+        });
       }
+      
+      // Set CORS headers
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Origin', req.headers.origin || frontendUrl);
+      
+      res.json({ 
+        message: 'Login successful',
+        authenticated: true,
+        user: {
+          id: user._id.toString(),
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role
+        }
+      });
     });
   } catch (err) {
     console.error('Login error:', err);
-    res.status(500).json({ error: 'Login failed. Please try again.' });
+    res.status(500).json({ 
+      authenticated: false,
+      error: 'Login failed. Please try again.' 
+    });
   }
 });
 
 app.post('/api/auth/logout', (req, res) => {
+  // Set CORS headers
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', req.headers.origin || frontendUrl);
+  
   req.session.destroy(err => {
     if (err) {
       console.error('Logout error:', err);
       return res.status(500).json({ error: 'Logout failed' });
     }
-    res.clearCookie('connect.sid');
-    res.json({ message: 'Logout successful' });
+    
+    // Clear cookie
+    res.clearCookie('damodar.sid', {
+      path: '/',
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax'
+    });
+    
+    res.json({ 
+      message: 'Logout successful',
+      authenticated: false 
+    });
   });
 });
 
@@ -268,7 +375,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     );
     
     // In production, send email with reset link
-    const resetLink = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
+    const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
     
     console.log('Password reset link:', resetLink); // For development only
     
@@ -733,6 +840,7 @@ app.put('/api/users/:id', requireUserAuth, async (req, res) => {
     // Update session if name changed
     if (req.body.name && req.session.user) {
       req.session.user.name = req.body.name;
+      req.session.save();
     }
     
     const updatedUser = await usersCollection.findOne({ 
@@ -809,6 +917,21 @@ app.get('/api/test/inquiries', async (req, res) => {
   }
 });
 
+// ==================== TEST COOKIE ENDPOINT ====================
+app.get('/api/test-cookie', (req, res) => {
+  res.cookie('test_cookie', 'working', {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000
+  });
+  
+  res.json({ 
+    message: 'Test cookie set',
+    cookies: req.cookies 
+  });
+});
+
 // ==================== HEALTH CHECK ====================
 
 app.get('/api/health', (req, res) => {
@@ -817,6 +940,7 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     service: 'Damodar Traders Main Website API',
     version: '2.0.0',
+    environment: isProduction ? 'production' : 'development',
     features: [
       'product-search',
       'search-suggestions',
@@ -825,7 +949,8 @@ app.get('/api/health', (req, res) => {
       'inquiry-management',
       'user-inquiries',
       'forgot-password',
-      'password-reset'
+      'password-reset',
+      'session-cookies'
     ]
   });
 });
@@ -841,6 +966,7 @@ app.listen(PORT, async () => {
   🚀 Server running on port: ${PORT}
   📁 Static files from: ${path.join(__dirname, 'public')}
   🔧 API Base URL: http://localhost:${PORT}/api
+  🌍 Environment: ${isProduction ? 'Production' : 'Development'}
   
   🔍 Search Endpoints:
   ├── /api/products/search            - Search products
@@ -874,14 +1000,16 @@ app.listen(PORT, async () => {
   ├── /api/debug/session              - Session info
   ├── /api/debug/db                   - Database info
   ├── /api/test/inquiries             - Test inquiries
+  ├── /api/test-cookie                - Test cookie
   
   💪 Health Check:
   └── /api/health                     - Server health
   
-  👤 User login: http://localhost:${PORT}/login
-  🔐 Reset password: http://localhost:${PORT}/reset-password
-  🏪 Products page: http://localhost:${PORT}/categories.html
-  👤 Account page: http://localhost:${PORT}/account
+  ⚠️  Important Notes:
+  - Session Cookie Name: damodar.sid
+  - CORS Enabled for cross-origin
+  - Cookies: ${isProduction ? 'Secure' : 'Insecure'} mode
+  - SameSite: ${isProduction ? 'none' : 'lax'}
   
   ✅ Server is ready!`);
 });
