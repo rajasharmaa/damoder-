@@ -1,9 +1,11 @@
+// server.js - Complete Persistent Session Backend
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 const { connectToDB } = require('./database');
 const { ObjectId } = require('mongodb');
@@ -12,49 +14,50 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Trust proxy for production (Render/Heroku)
-if (process.env.NODE_ENV === 'production') {
+// Trust proxy for production
+const isProduction = process.env.NODE_ENV === 'production';
+if (isProduction) {
   app.set('trust proxy', 1);
 }
 
-// Enhanced CORS configuration for cross-origin
+// Enhanced CORS configuration
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5500',
+  'http://localhost:3001',
+  'http://localhost:8080',
+  'https://damoder-traders-x2iy.vercel.app',
+  'https://damodertraders.onrender.com',
+];
+
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin && process.env.NODE_ENV === 'development') {
+    if (!origin && !isProduction) {
       return callback(null, true);
     }
     
-    const allowedOrigins = [
-      'http://localhost:3000', 
-      'http://127.0.0.1:5500', 
-      'http://localhost:3001',
-      'http://localhost:8080',
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'https://damoder-traders-x2iy.vercel.app',
-      'https://damodertraders.onrender.com',
-      'https://*.vercel.app'
-    ];
-    
-    // Allow all vercel subdomains
-    if (origin && (allowedOrigins.indexOf(origin) !== -1 || 
-        origin.endsWith('.vercel.app') || 
-        origin.includes('localhost'))) {
+    if (allowedOrigins.indexOf(origin) !== -1 || 
+        (origin && origin.includes('localhost')) ||
+        (origin && origin.endsWith('.vercel.app'))) {
       callback(null, true);
     } else {
-      console.log('⚠️  Blocked CORS for origin:', origin);
+      console.log('⚠️ Blocked CORS for origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'Accept', 
-    'Origin', 
-    'X-Requested-With', 
-    'X-CSRF-Token',
+    'Content-Type',
+    'Authorization',
+    'Accept',
+    'Origin',
+    'X-Requested-With',
+    'X-Client',
+    'X-Client-Version',
+    'X-Session-Refresh',
     'Cache-Control',
     'Expires',
     'Pragma'
@@ -66,7 +69,7 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Handle preflight requests explicitly
+// Handle preflight requests
 app.options('*', cors());
 
 // Middleware
@@ -74,36 +77,44 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Session configuration optimized for cross-origin
-const isProduction = process.env.NODE_ENV === 'production';
+// Session configuration with MongoDB store
 const sessionConfig = {
-  secret: process.env.SESSION_SECRET || 'damodar-traders-secret-key-2024',
-  resave: false, // Don't save session if unmodified
-  saveUninitialized: false, // Don't create session until something stored
-  proxy: isProduction, // Trust reverse proxy in production
-  name: 'dt_session_id', // Custom session cookie name
-  cookie: { 
-    secure: isProduction, // HTTPS only in production
-    httpOnly: true, // Prevent client-side JS access
-    sameSite: isProduction ? 'none' : 'lax', // Required for cross-origin
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    // Don't set domain for cross-origin compatibility
+  secret: process.env.SESSION_SECRET || 'damodar-traders-secure-session-secret-2024',
+  resave: false,
+  saveUninitialized: false,
+  proxy: isProduction,
+  name: 'dt_session_id',
+  rolling: true, // Extend session on activity
+  cookie: {
+    secure: isProduction,
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days default
     path: '/',
-    // Additional security for production
-    ...(isProduction && { 
-      domain: '.damodertraders.onrender.com', // Allow subdomains
-    })
+    ...(isProduction && {
+      domain: '.damodertraders.onrender.com',
+    }),
   },
-  // Optional: Add session store for production (Redis recommended)
-  // store: sessionStore
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    collectionName: 'user_sessions',
+    ttl: 30 * 24 * 60 * 60, // 30 days
+    autoRemove: 'native',
+    crypto: {
+      secret: process.env.SESSION_SECRET || 'damodar-session-secret'
+    },
+    touchAfter: 24 * 3600, // Only update once per day unless modified
+  }),
 };
 
-// Log session config for debugging
+// Log session config
 console.log('Session Configuration:', {
   isProduction,
+  store: 'MongoDB',
+  cookieMaxAge: '30 days',
   cookieSecure: sessionConfig.cookie.secure,
   cookieSameSite: sessionConfig.cookie.sameSite,
-  cookieDomain: sessionConfig.cookie.domain
+  rollingSessions: true,
 });
 
 app.use(session(sessionConfig));
@@ -111,63 +122,200 @@ app.use(session(sessionConfig));
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Helper function to validate ObjectId
+// Helper functions
 function isValidObjectId(id) {
   if (!id) return false;
   return /^[0-9a-fA-F]{24}$/.test(id);
 }
 
-// User auth middleware
+function createSession(req, user, rememberMe = false) {
+  req.session.user = {
+    id: user._id.toString(),
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    avatar: user.avatar,
+    phone: user.phone,
+  };
+  
+  // Set longer maxAge for "remember me"
+  if (rememberMe) {
+    req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+  } else {
+    req.session.cookie.maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+  }
+  
+  // Update session in store
+  req.session.touch();
+}
+
+// Authentication middleware
 function requireUserAuth(req, res, next) {
-  console.log('Auth check - Session user:', req.session.user);
-  console.log('Auth check - Session ID:', req.sessionID);
-  console.log('Auth check - Cookies:', req.cookies);
+  console.log('🔐 Auth check:', {
+    hasSession: !!req.session.user,
+    sessionId: req.sessionID,
+    path: req.path,
+  });
   
   if (!req.session.user) {
-    console.log('❌ User not authenticated');
-    if (req.headers.accept && req.headers.accept.includes('application/json')) {
-      return res.status(401).json({ 
-        authenticated: false,
-        error: 'Unauthorized - Please login first' 
-      });
-    }
-    return res.status(401).json({ 
+    console.log('❌ No user in session');
+    return res.status(401).json({
       authenticated: false,
-      error: 'Please login first' 
+      error: 'Unauthorized - Please login first',
+      code: 'SESSION_EXPIRED'
     });
   }
+  
   console.log('✅ User authenticated:', req.session.user.email);
   next();
 }
 
-// ==================== USER AUTHENTICATION ====================
+// ==================== ENHANCED AUTH ENDPOINTS ====================
+
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    service: 'Damodar Traders API',
+    version: '2.1.0',
+    session: {
+      hasUser: !!req.session.user,
+      id: req.sessionID,
+      store: 'MongoDB',
+    },
+    features: ['persistent-sessions', 'mongodb-store', 'auto-refresh'],
+  });
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    session: {
+      id: req.sessionID,
+      hasUser: !!req.session.user,
+    },
+    message: 'API is working correctly',
+  });
+});
+
+// Auth status
 app.get('/api/auth/status', (req, res) => {
   console.log('=== Auth Status Check ===');
   console.log('Session ID:', req.sessionID);
   console.log('Session user:', req.session.user);
-  console.log('Origin:', req.headers.origin);
-  console.log('Cookies received:', req.headers.cookie);
   
   if (req.session.user) {
-    console.log('✅ Returning authenticated user');
-    res.json({ 
-      authenticated: true, 
+    // Update last activity
+    req.session.touch();
+    
+    res.json({
+      authenticated: true,
       user: {
         id: req.session.user.id,
         name: req.session.user.name,
         email: req.session.user.email,
-        role: req.session.user.role
-      }
+        role: req.session.user.role,
+        phone: req.session.user.phone,
+        avatar: req.session.user.avatar,
+      },
+      session: {
+        expires: new Date(Date.now() + req.session.cookie.maxAge).toISOString(),
+        maxAge: req.session.cookie.maxAge,
+      },
     });
   } else {
-    console.log('❌ No user in session');
-    res.json({ 
+    res.json({
       authenticated: false,
-      message: 'Not authenticated'
+      message: 'Not authenticated',
     });
   }
 });
 
+// Login with persistent sessions
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    console.log('=== LOGIN ATTEMPT ===');
+    console.log('Email:', req.body.email);
+    console.log('Remember me:', req.body.rememberMe);
+    
+    const { email, password, rememberMe = false } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: 'Email and password are required',
+      });
+    }
+    
+    const db = await connectToDB();
+    const usersCollection = db.collection('users');
+    
+    // Find user
+    const user = await usersCollection.findOne({ email });
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        error: 'User not found. Please register first.',
+      });
+    }
+    
+    // Check password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid password. Please try again.',
+      });
+    }
+    
+    // Create session
+    createSession(req, user, rememberMe);
+    
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to create session',
+        });
+      }
+      
+      console.log('✅ Login successful for:', user.email);
+      console.log('Session maxAge:', req.session.cookie.maxAge);
+      
+      res.json({
+        success: true,
+        message: 'Login successful',
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          avatar: user.avatar,
+        },
+        session: {
+          expiresAt: new Date(Date.now() + req.session.cookie.maxAge).toISOString(),
+          maxAge: req.session.cookie.maxAge,
+          persistent: rememberMe,
+        },
+      });
+    });
+    
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Login failed. Please try again.',
+      details: isProduction ? undefined : err.message,
+    });
+  }
+});
+
+// Register
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
@@ -175,16 +323,22 @@ app.post('/api/auth/register', async (req, res) => {
     console.log('Registration attempt:', { name, email });
     
     if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email and password are required' });
+      return res.status(400).json({
+        success: false,
+        error: 'Name, email and password are required',
+      });
     }
     
     const db = await connectToDB();
     const usersCollection = db.collection('users');
     
-    // Check if user already exists
+    // Check if user exists
     const existingUser = await usersCollection.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ error: 'User already exists' });
+      return res.status(400).json({
+        success: false,
+        error: 'User already exists',
+      });
     }
     
     // Hash password
@@ -196,175 +350,179 @@ app.post('/api/auth/register', async (req, res) => {
       phone: phone || '',
       password: hashedPassword,
       role: 'user',
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`,
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      lastLogin: new Date(),
     };
     
     const result = await usersCollection.insertOne(newUser);
     
     // Create session
-    req.session.user = {
-      id: result.insertedId.toString(),
-      email: newUser.email,
-      name: newUser.name,
-      role: 'user'
-    };
+    createSession(req, { ...newUser, _id: result.insertedId }, false);
     
-    // Save session explicitly
     req.session.save((err) => {
       if (err) {
         console.error('Session save error:', err);
-        return res.status(500).json({ error: 'Failed to create session' });
+        return res.status(500).json({
+          success: false,
+          error: 'Registration successful but failed to create session',
+        });
       }
       
       console.log('✅ Registration successful for:', newUser.email);
-      console.log('Session after registration:', req.session);
       
-      res.status(201).json({ 
+      res.status(201).json({
+        success: true,
         message: 'Registration successful',
         user: {
           id: result.insertedId,
           name: newUser.name,
-          email: newUser.email
-        }
+          email: newUser.email,
+          phone: newUser.phone,
+          role: newUser.role,
+          avatar: newUser.avatar,
+        },
       });
     });
     
   } catch (err) {
     console.error('Registration error:', err);
-    res.status(500).json({ error: 'Registration failed' });
-  }
-});
-
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    console.log('=== LOGIN ATTEMPT ===');
-    console.log('Request body:', { email: req.body.email, password: '***' });
-    console.log('Session ID:', req.sessionID);
-    console.log('Origin:', req.headers.origin);
-    console.log('Cookies received:', req.headers.cookie);
-    
-    const { email, password } = req.body;
-    
-    if (!email || !password) {
-      console.log('Missing email or password');
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-    
-    const db = await connectToDB();
-    const usersCollection = db.collection('users');
-    
-    // Find user
-    const user = await usersCollection.findOne({ email });
-    console.log('Found user:', user ? 'Yes' : 'No');
-    
-    if (!user) {
-      console.log('User not found for email:', email);
-      return res.status(401).json({ error: 'User not found. Please register first.' });
-    }
-    
-    // Check password
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    console.log('Password match:', passwordMatch);
-    
-    if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid password. Please try again.' });
-    }
-    
-    // Create session
-    req.session.user = {
-      id: user._id.toString(),
-      email: user.email,
-      name: user.name,
-      role: user.role
-    };
-    
-    // Save session
-    req.session.save((err) => {
-      if (err) {
-        console.error('Session save error:', err);
-        return res.status(500).json({ error: 'Failed to create session' });
-      }
-      
-      console.log('✅ Login successful for user:', user.email);
-      console.log('Session after login:', req.session);
-      console.log('Session cookie details:', req.session.cookie);
-      
-      // Set additional cookie for debugging
-      res.cookie('dt_logged_in', 'true', {
-        maxAge: 24 * 60 * 60 * 1000,
-        httpOnly: false, // Allow JS access for debugging
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-        path: '/'
-      });
-      
-      res.json({ 
-        message: 'Login successful',
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone
-        },
-        session: {
-          id: req.sessionID,
-          cookie: req.session.cookie
-        }
-      });
-    });
-    
-  } catch (err) {
-    console.error('Login error:', err);
-    console.error('Error stack:', err.stack);
-    res.status(500).json({ 
-      error: 'Login failed. Please try again.',
-      details: process.env.NODE_ENV === 'development' ? err.message : undefined
+    res.status(500).json({
+      success: false,
+      error: 'Registration failed',
     });
   }
 });
 
+// Logout
 app.post('/api/auth/logout', (req, res) => {
   console.log('=== LOGOUT ===');
-  console.log('Session before logout:', req.session.user);
+  console.log('User:', req.session.user?.email);
   
   req.session.destroy((err) => {
     if (err) {
       console.error('Logout error:', err);
-      return res.status(500).json({ error: 'Logout failed' });
+      return res.status(500).json({
+        success: false,
+        error: 'Logout failed',
+      });
     }
     
-    // Clear the session cookie
     res.clearCookie('dt_session_id', {
       path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.damodertraders.onrender.com' : undefined
-    });
-    
-    // Clear debug cookie
-    res.clearCookie('dt_logged_in', {
-      path: '/',
-      domain: process.env.NODE_ENV === 'production' ? '.damodertraders.onrender.com' : undefined
+      domain: isProduction ? '.damodertraders.onrender.com' : undefined,
     });
     
     console.log('✅ Logout successful');
-    res.json({ 
+    res.json({
+      success: true,
       message: 'Logout successful',
-      timestamp: new Date().toISOString()
     });
   });
 });
 
-// ==================== FORGOT PASSWORD ROUTES ====================
+// Session refresh
+app.post('/api/auth/refresh-session', requireUserAuth, (req, res) => {
+  try {
+    console.log('=== SESSION REFRESH ===');
+    console.log('User:', req.session.user.email);
+    console.log('Current maxAge:', req.session.cookie.maxAge);
+    
+    // Touch the session to reset maxAge
+    req.session.touch();
+    
+    // Determine new maxAge based on current session
+    const currentMaxAge = req.session.cookie.maxAge;
+    const isPersistent = currentMaxAge >= 30 * 24 * 60 * 60 * 1000; // 30 days
+    
+    // Extend session (30 days for persistent, 7 days for regular)
+    const newMaxAge = isPersistent 
+      ? 30 * 24 * 60 * 60 * 1000 
+      : 7 * 24 * 60 * 60 * 1000;
+    
+    req.session.cookie.maxAge = newMaxAge;
+    
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session refresh error:', err);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to refresh session',
+        });
+      }
+      
+      console.log('✅ Session refreshed');
+      console.log('New maxAge:', newMaxAge);
+      
+      res.json({
+        success: true,
+        message: 'Session refreshed',
+        session: {
+          expiresAt: new Date(Date.now() + newMaxAge).toISOString(),
+          maxAge: newMaxAge,
+          persistent: isPersistent,
+        },
+      });
+    });
+  } catch (err) {
+    console.error('Session refresh error:', err);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to refresh session',
+    });
+  }
+});
 
-// Check if email exists
+// Keep-alive endpoint (doesn't require auth)
+app.get('/api/auth/keep-alive', (req, res) => {
+  if (req.session.user) {
+    // Just touch the session to keep it alive
+    req.session.touch();
+    console.log('💓 Keep-alive for:', req.session.user.email);
+  }
+  
+  res.json({
+    success: true,
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    user: req.session.user ? 'authenticated' : 'anonymous',
+  });
+});
+
+// Session info endpoint
+app.get('/api/auth/session-info', requireUserAuth, (req, res) => {
+  res.json({
+    success: true,
+    session: {
+      id: req.sessionID,
+      user: req.session.user,
+      cookie: {
+        maxAge: req.session.cookie.maxAge,
+        expires: req.session.cookie.expires,
+        originalMaxAge: req.session.cookie.originalMaxAge,
+        secure: req.session.cookie.secure,
+        sameSite: req.session.cookie.sameSite,
+        httpOnly: req.session.cookie.httpOnly,
+      },
+      store: 'mongodb',
+      createdAt: req.session.createdAt,
+      lastActivity: new Date(),
+    },
+    timestamp: new Date().toISOString(),
+    timeRemaining: Math.round(req.session.cookie.maxAge / 1000 / 60 / 60) + ' hours',
+  });
+});
+
+// Check email
 app.get('/api/auth/check-email', async (req, res) => {
   try {
     const { email } = req.query;
     
     if (!email) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         exists: false,
-        message: 'Email is required' 
+        message: 'Email is required',
       });
     }
     
@@ -373,27 +531,27 @@ app.get('/api/auth/check-email', async (req, res) => {
     
     const user = await usersCollection.findOne({ email });
     
-    res.json({ 
+    res.json({
       exists: !!user,
       message: user ? 'Account exists' : 'No account found',
       user: user ? {
         id: user._id,
         name: user.name,
         email: user.email,
-        hasAccount: true
-      } : null
+        hasAccount: true,
+      } : null,
     });
   } catch (err) {
     console.error('Error checking email:', err);
-    res.status(500).json({ 
+    res.status(500).json({
       exists: false,
       message: 'Error checking email',
-      error: err.message 
+      error: err.message,
     });
   }
 });
 
-// Forgot password request
+// Forgot password
 app.post('/api/auth/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
@@ -405,45 +563,40 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     const db = await connectToDB();
     const usersCollection = db.collection('users');
     
-    // Check if user exists
     const user = await usersCollection.findOne({ email });
     
     if (!user) {
-      // Return success even if user doesn't exist (security best practice)
-      return res.json({ 
+      // Return success even if user doesn't exist (security)
+      return res.json({
+        success: true,
         message: 'If an account exists with this email, you will receive password reset instructions.',
-        sent: true 
       });
     }
     
     // Generate reset token
     const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenExpiry = Date.now() + 3600000; // 1 hour from now
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour
     
-    // Save reset token to user document
     await usersCollection.updateOne(
       { _id: user._id },
-      { 
-        $set: { 
+      {
+        $set: {
           resetToken,
-          resetTokenExpiry: new Date(resetTokenExpiry)
-        } 
+          resetTokenExpiry: new Date(resetTokenExpiry),
+        },
       }
     );
     
-    // In production, send email with reset link
+    // In production, send email here
     const resetLink = `${process.env.FRONTEND_URL || 'https://damoder-traders-x2iy.vercel.app'}/reset-password?token=${resetToken}`;
     
-    console.log('Password reset link:', resetLink); // For development only
+    console.log('Password reset link:', resetLink); // For development
     
-    // TODO: Implement actual email sending
-    // sendResetEmail(user.email, resetLink);
-    
-    res.json({ 
+    res.json({
+      success: true,
       message: 'Password reset instructions sent to your email.',
-      sent: true,
-      // For development only - remove in production
-      development: { resetLink }
+      // For development only
+      development: { resetLink },
     });
   } catch (err) {
     console.error('Forgot password error:', err);
@@ -451,7 +604,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
   }
 });
 
-// Reset password with token
+// Reset password
 app.post('/api/auth/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body;
@@ -467,10 +620,9 @@ app.post('/api/auth/reset-password', async (req, res) => {
     const db = await connectToDB();
     const usersCollection = db.collection('users');
     
-    // Find user with valid reset token
     const user = await usersCollection.findOne({
       resetToken: token,
-      resetTokenExpiry: { $gt: new Date() }
+      resetTokenExpiry: { $gt: new Date() },
     });
     
     if (!user) {
@@ -480,24 +632,23 @@ app.post('/api/auth/reset-password', async (req, res) => {
     // Hash new password
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    // Update password and clear reset token
     await usersCollection.updateOne(
       { _id: user._id },
-      { 
-        $set: { 
+      {
+        $set: {
           password: hashedPassword,
-          updatedAt: new Date()
+          updatedAt: new Date(),
         },
         $unset: {
-          resetToken: "",
-          resetTokenExpiry: ""
-        }
+          resetToken: '',
+          resetTokenExpiry: '',
+        },
       }
     );
     
-    res.json({ 
+    res.json({
+      success: true,
       message: 'Password reset successful. You can now login with your new password.',
-      success: true 
     });
   } catch (err) {
     console.error('Reset password error:', err);
@@ -505,7 +656,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
-// Password strength validation
+// Validate password strength
 app.post('/api/auth/validate-password', (req, res) => {
   const { password } = req.body;
   
@@ -514,7 +665,7 @@ app.post('/api/auth/validate-password', (req, res) => {
     hasUppercase: /[A-Z]/.test(password),
     hasLowercase: /[a-z]/.test(password),
     hasNumber: /\d/.test(password),
-    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+    hasSpecial: /[!@#$%^&*(),.?":{}|<>]/.test(password),
   };
   
   const isValid = Object.values(validations).every(v => v);
@@ -522,11 +673,11 @@ app.post('/api/auth/validate-password', (req, res) => {
   res.json({
     valid: isValid,
     validations,
-    score: Object.values(validations).filter(v => v).length
+    score: Object.values(validations).filter(v => v).length,
   });
 });
 
-// ==================== ENHANCED PRODUCT ROUTES WITH SEARCH ====================
+// ==================== PRODUCT ENDPOINTS ====================
 
 // Get all products
 app.get('/api/products', async (req, res) => {
@@ -537,7 +688,7 @@ app.get('/api/products', async (req, res) => {
     res.json(products);
   } catch (err) {
     console.error('Error fetching products:', err);
-    res.json([]); // Return empty array instead of error
+    res.json([]);
   }
 });
 
@@ -546,13 +697,13 @@ app.get('/api/products/category/:category', async (req, res) => {
   try {
     const db = await connectToDB();
     const productsCollection = db.collection('products');
-    const products = await productsCollection.find({ 
-      category: req.params.category 
+    const products = await productsCollection.find({
+      category: req.params.category,
     }).sort({ createdAt: -1 }).toArray();
     res.json(products);
   } catch (err) {
     console.error('Error fetching products by category:', err);
-    res.json([]); // Return empty array instead of error
+    res.json([]);
   }
 });
 
@@ -564,7 +715,6 @@ app.get('/api/products/search', async (req, res) => {
     const db = await connectToDB();
     const productsCollection = db.collection('products');
     
-    // Build query
     const query = {};
     
     if (search) {
@@ -572,7 +722,7 @@ app.get('/api/products/search', async (req, res) => {
         { name: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
         { category: { $regex: search, $options: 'i' } },
-        { material: { $regex: search, $options: 'i' } }
+        { material: { $regex: search, $options: 'i' } },
       ];
     }
     
@@ -584,7 +734,7 @@ app.get('/api/products/search', async (req, res) => {
     res.json(products);
   } catch (err) {
     console.error('Error searching products:', err);
-    res.json([]); // Return empty array instead of error
+    res.json([]);
   }
 });
 
@@ -596,19 +746,19 @@ app.get('/api/products/search/suggestions', async (req, res) => {
     if (!query || query.trim().length < 2) {
       return res.json([]);
     }
-
+    
     const db = await connectToDB();
     const productsCollection = db.collection('products');
-
+    
     const suggestions = await productsCollection.aggregate([
       {
         $match: {
           $or: [
             { name: { $regex: query, $options: 'i' } },
             { category: { $regex: query, $options: 'i' } },
-            { material: { $regex: query, $options: 'i' } }
-          ]
-        }
+            { material: { $regex: query, $options: 'i' } },
+          ],
+        },
       },
       {
         $project: {
@@ -617,78 +767,70 @@ app.get('/api/products/search/suggestions', async (req, res) => {
           _id: 1,
           score: {
             $add: [
-              { $cond: [ 
-                { $regexMatch: { input: "$name", regex: new RegExp(query, "i") } }, 
-                10, 
-                0 
-              ]},
-              { $cond: [ 
-                { $regexMatch: { input: "$category", regex: new RegExp(query, "i") } }, 
-                5, 
-                0 
-              ]},
-              { $cond: [ 
-                { $regexMatch: { input: "$material", regex: new RegExp(query, "i") } }, 
-                3, 
-                0 
-              ]}
-            ]
-          }
-        }
+              {
+                $cond: [
+                  { $regexMatch: { input: '$name', regex: new RegExp(query, 'i') } },
+                  10,
+                  0,
+                ],
+              },
+              {
+                $cond: [
+                  { $regexMatch: { input: '$category', regex: new RegExp(query, 'i') } },
+                  5,
+                  0,
+                ],
+              },
+              {
+                $cond: [
+                  { $regexMatch: { input: '$material', regex: new RegExp(query, 'i') } },
+                  3,
+                  0,
+                ],
+              },
+            ],
+          },
+        },
       },
       { $sort: { score: -1 } },
-      { $limit: 10 }
+      { $limit: 10 },
     ]).toArray();
-
+    
     res.json(suggestions);
   } catch (err) {
     console.error('Error fetching search suggestions:', err);
-    res.json([]); // Return empty array instead of error
+    res.json([]);
   }
 });
 
-// Get single product by ID
+// Get single product
 app.get('/api/products/:id', async (req, res) => {
   try {
-    // Validate ObjectId format
     if (!isValidObjectId(req.params.id)) {
-      console.warn(`Invalid product ID format: ${req.params.id}`);
-      return res.json(null); // Return null instead of error
+      return res.json(null);
     }
     
     const db = await connectToDB();
     const productsCollection = db.collection('products');
-    const product = await productsCollection.findOne({ 
-      _id: new ObjectId(req.params.id) 
+    const product = await productsCollection.findOne({
+      _id: new ObjectId(req.params.id),
     });
     
-    if (!product) {
-      return res.json(null); // Return null instead of 404 error
-    }
-    res.json(product);
+    res.json(product || null);
   } catch (err) {
     console.error('Error fetching product:', err);
-    
-    // Handle specific ObjectId errors
-    if (err.message.includes('must be a 24 character hex string') || 
-        err.message.includes('Argument passed in must be a string of 12 bytes')) {
-      return res.json(null); // Return null for invalid IDs
-    }
-    
-    // For other errors, return null
     res.json(null);
   }
 });
 
-// Get products with discount
+// Get discounted products
 app.get('/api/products/discounted', async (req, res) => {
   try {
     const db = await connectToDB();
     const productsCollection = db.collection('products');
     
-    // Use $exists to ensure discount field exists and is greater than 0
-    const discountedProducts = await productsCollection.find({ 
-      discount: { $exists: true, $ne: null, $gt: 0 } 
+    const discountedProducts = await productsCollection.find({
+      discount: { $exists: true, $ne: null, $gt: 0 },
     }).sort({ discount: -1 }).limit(10).toArray();
     
     res.json(discountedProducts || []);
@@ -704,8 +846,8 @@ app.get('/api/products/popular', async (req, res) => {
     const db = await connectToDB();
     const productsCollection = db.collection('products');
     
-    const popularProducts = await productsCollection.find({ 
-      discount: { $exists: true, $ne: null, $gt: 0 } 
+    const popularProducts = await productsCollection.find({
+      discount: { $exists: true, $ne: null, $gt: 0 },
     }).sort({ discount: -1 }).limit(10).toArray();
     
     res.json(popularProducts || []);
@@ -715,155 +857,43 @@ app.get('/api/products/popular', async (req, res) => {
   }
 });
 
-// ==================== INQUIRY ROUTES ====================
+// ==================== USER ENDPOINTS ====================
 
-app.post('/api/inquiries', async (req, res) => {
-  try {
-    const db = await connectToDB();
-    const inquiriesCollection = db.collection('inquiries');
-    
-    const newInquiry = {
-      name: req.body.name,
-      email: req.body.email,
-      phone: req.body.phone,
-      subject: req.body.subject,
-      message: req.body.message,
-      status: 'new',
-      createdAt: new Date(),
-      read: false,
-      userId: req.body.userId || null
-    };
-    
-    const result = await inquiriesCollection.insertOne(newInquiry);
-    res.status(201).json({ 
-      ...newInquiry, 
-      _id: result.insertedId, 
-      message: 'Inquiry submitted successfully' 
-    });
-  } catch (err) {
-    console.error('Error creating inquiry:', err);
-    res.status(500).json({ error: 'Failed to submit inquiry' });
-  }
-});
-
-// ==================== USER INQUIRIES ROUTES ====================
-
-app.get('/api/user/inquiries', requireUserAuth, async (req, res) => {
-  try {
-    // Debug: Log session information
-    console.log('=== DEBUG: User Inquiries Request ===');
-    console.log('Session ID:', req.sessionID);
-    console.log('Session user:', req.session.user);
-    
-    // Validate that session user ID is valid
-    if (!req.session.user?.id) {
-      console.warn('No user ID in session');
-      return res.json([]);
-    }
-    
-    // Convert to string if it's an ObjectId
-    const userId = req.session.user.id.toString();
-    console.log('User ID from session:', userId);
-    
-    if (!isValidObjectId(userId)) {
-      console.warn(`Invalid user session ID format: ${userId}`);
-      return res.json([]);
-    }
-    
-    const db = await connectToDB();
-    const inquiriesCollection = db.collection('inquiries');
-    
-    console.log('Looking for inquiries with user ID:', userId);
-    
-    // Try to find inquiries with this userId
-    const inquiries = await inquiriesCollection.find({ 
-      userId: new ObjectId(userId) 
-    }).sort({ createdAt: -1 }).toArray();
-    
-    console.log(`Found ${inquiries.length} inquiries for user ${userId}`);
-    
-    // If no inquiries found with userId, try with email (backward compatibility)
-    if (inquiries.length === 0) {
-      console.log('No inquiries found with userId, trying with email:', req.session.user.email);
-      
-      const inquiriesByEmail = await inquiriesCollection.find({ 
-        email: req.session.user.email 
-      }).sort({ createdAt: -1 }).toArray();
-      
-      console.log(`Found ${inquiriesByEmail.length} inquiries by email`);
-      
-      // Update these inquiries with the userId for future reference
-      if (inquiriesByEmail.length > 0) {
-        await inquiriesCollection.updateMany(
-          { email: req.session.user.email, userId: { $exists: false } },
-          { $set: { userId: new ObjectId(userId) } }
-        );
-      }
-      
-      return res.json(inquiriesByEmail);
-    }
-    
-    res.json(inquiries);
-  } catch (err) {
-    console.error('Error fetching user inquiries:', err);
-    console.error('Error stack:', err.stack);
-    
-    // Handle specific ObjectId errors gracefully
-    if (err.message.includes('must be a 24 character hex string') || 
-        err.message.includes('Argument passed in must be a string of 12 bytes')) {
-      console.warn('ObjectId parsing error');
-      return res.json([]);
-    }
-    
-    res.json([]);
-  }
-});
-
-// ==================== USER PROFILE ROUTES ====================
-
+// Get user profile
 app.get('/api/users/:id', requireUserAuth, async (req, res) => {
   try {
-    // Validate ObjectId format
     if (!isValidObjectId(req.params.id)) {
-      console.warn(`Invalid user ID format: ${req.params.id}`);
       return res.json(null);
+    }
+    
+    if (req.session.user.id !== req.params.id && req.session.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     
     const db = await connectToDB();
     const usersCollection = db.collection('users');
     
-    const user = await usersCollection.findOne({ 
-      _id: new ObjectId(req.params.id) 
-    }, { projection: { password: 0 } });
+    const user = await usersCollection.findOne(
+      { _id: new ObjectId(req.params.id) },
+      { projection: { password: 0 } }
+    );
     
-    if (!user) {
-      return res.json(null);
-    }
-    
-    // Check if requesting user owns this profile
-    if (req.session.user.id.toString() !== req.params.id && req.session.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Forbidden' });
-    }
-    
-    res.json(user);
+    res.json(user || null);
   } catch (err) {
     console.error('Error fetching user:', err);
-    
-    // Handle specific ObjectId errors
-    if (err.message.includes('must be a 24 character hex string') || 
-        err.message.includes('Argument passed in must be a string of 12 bytes')) {
-      return res.json(null);
-    }
-    
     res.json(null);
   }
 });
 
+// Update user profile
 app.put('/api/users/:id', requireUserAuth, async (req, res) => {
   try {
-    // Validate ObjectId format
     if (!isValidObjectId(req.params.id)) {
-      return res.status(400).json({ error: 'Invalid user ID format' });
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    
+    if (req.session.user.id !== req.params.id && req.session.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Forbidden' });
     }
     
     const db = await connectToDB();
@@ -872,10 +902,9 @@ app.put('/api/users/:id', requireUserAuth, async (req, res) => {
     const updateData = {
       name: req.body.name,
       phone: req.body.phone,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
     
-    // Allow password update if provided
     if (req.body.password) {
       updateData.password = await bcrypt.hash(req.body.password, 10);
     }
@@ -894,26 +923,84 @@ app.put('/api/users/:id', requireUserAuth, async (req, res) => {
       req.session.user.name = req.body.name;
     }
     
-    const updatedUser = await usersCollection.findOne({ 
-      _id: new ObjectId(req.params.id) 
-    }, { projection: { password: 0 } });
+    const updatedUser = await usersCollection.findOne(
+      { _id: new ObjectId(req.params.id) },
+      { projection: { password: 0 } }
+    );
     
     res.json(updatedUser);
   } catch (err) {
     console.error('Error updating user:', err);
-    
-    // Handle specific ObjectId errors
-    if (err.message.includes('must be a 24 character hex string') || 
-        err.message.includes('Argument passed in must be a string of 12 bytes')) {
-      return res.status(400).json({ error: 'Invalid user ID format' });
-    }
-    
     res.status(500).json({ error: 'Failed to update user' });
   }
 });
 
-// ==================== DEBUG & TEST ENDPOINTS ====================
+// ==================== INQUIRY ENDPOINTS ====================
 
+// Create inquiry
+app.post('/api/inquiries', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const inquiriesCollection = db.collection('inquiries');
+    
+    const newInquiry = {
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone,
+      subject: req.body.subject,
+      message: req.body.message,
+      status: 'new',
+      createdAt: new Date(),
+      read: false,
+      userId: req.body.userId || null,
+    };
+    
+    const result = await inquiriesCollection.insertOne(newInquiry);
+    
+    res.status(201).json({
+      ...newInquiry,
+      _id: result.insertedId,
+      message: 'Inquiry submitted successfully',
+    });
+  } catch (err) {
+    console.error('Error creating inquiry:', err);
+    res.status(500).json({ error: 'Failed to submit inquiry' });
+  }
+});
+
+// Get user inquiries
+app.get('/api/user/inquiries', requireUserAuth, async (req, res) => {
+  try {
+    console.log('Getting inquiries for user:', req.session.user.id);
+    
+    if (!isValidObjectId(req.session.user.id)) {
+      return res.json([]);
+    }
+    
+    const db = await connectToDB();
+    const inquiriesCollection = db.collection('inquiries');
+    
+    const inquiries = await inquiriesCollection
+      .find({
+        $or: [
+          { userId: new ObjectId(req.session.user.id) },
+          { email: req.session.user.email },
+        ],
+      })
+      .sort({ createdAt: -1 })
+      .toArray();
+    
+    console.log(`Found ${inquiries.length} inquiries`);
+    res.json(inquiries);
+  } catch (err) {
+    console.error('Error fetching user inquiries:', err);
+    res.json([]);
+  }
+});
+
+// ==================== DEBUG ENDPOINTS ====================
+
+// Debug session
 app.get('/api/debug/session', (req, res) => {
   res.json({
     sessionId: req.sessionID,
@@ -923,12 +1010,12 @@ app.get('/api/debug/session', (req, res) => {
     headers: {
       origin: req.headers.origin,
       cookie: req.headers.cookie,
-      'user-agent': req.headers['user-agent']
     },
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
+// Debug cookies
 app.get('/api/debug/cookies', (req, res) => {
   res.json({
     cookies: req.cookies,
@@ -937,11 +1024,12 @@ app.get('/api/debug/cookies', (req, res) => {
     headers: {
       origin: req.headers.origin,
       cookie: req.headers.cookie,
-      'user-agent': req.headers['user-agent']
-    }
+      'user-agent': req.headers['user-agent'],
+    },
   });
 });
 
+// Debug database
 app.get('/api/debug/db', async (req, res) => {
   try {
     const db = await connectToDB();
@@ -950,87 +1038,15 @@ app.get('/api/debug/db', async (req, res) => {
     res.json({
       success: true,
       collections: collections.map(c => c.name),
-      message: 'Database connection successful'
+      message: 'Database connection successful',
     });
   } catch (err) {
     res.status(500).json({
       success: false,
       error: err.message,
-      message: 'Database connection failed'
+      message: 'Database connection failed',
     });
   }
-});
-
-app.get('/api/test/inquiries', async (req, res) => {
-  try {
-    const db = await connectToDB();
-    const inquiriesCollection = db.collection('inquiries');
-    
-    // Get a sample of inquiries
-    const sampleInquiries = await inquiriesCollection.find().limit(5).toArray();
-    
-    res.json({
-      success: true,
-      totalCount: await inquiriesCollection.countDocuments(),
-      sampleCount: sampleInquiries.length,
-      sample: sampleInquiries,
-      message: 'Database connection test successful'
-    });
-  } catch (err) {
-    console.error('Test endpoint error:', err);
-    res.status(500).json({
-      success: false,
-      error: err.message,
-      message: 'Database connection failed'
-    });
-  }
-});
-
-// Test endpoint for CORS and connectivity
-app.get('/api/test', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    cors: {
-      origin: req.headers.origin,
-      allowed: true
-    },
-    session: {
-      id: req.sessionID,
-      hasUser: !!req.session.user
-    },
-    cookies: req.cookies,
-    message: 'API is working correctly'
-  });
-});
-
-// ==================== HEALTH CHECK ====================
-
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    timestamp: new Date().toISOString(),
-    service: 'Damodar Traders Main Website API',
-    version: '2.0.0',
-    cors: {
-      origin: req.headers.origin,
-      allowed: true
-    },
-    session: {
-      id: req.sessionID,
-      hasUser: !!req.session.user
-    },
-    features: [
-      'product-search',
-      'search-suggestions',
-      'category-filtering',
-      'user-authentication',
-      'inquiry-management',
-      'user-inquiries',
-      'forgot-password',
-      'password-reset'
-    ]
-  });
 });
 
 // ==================== SERVER STARTUP ====================
@@ -1038,60 +1054,68 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, async () => {
   console.log(`
 ╔══════════════════════════════════════════════════════════╗
-║           DAMODAR TRADERS SERVER STARTING               ║
+║           DAMODAR TRADERS SERVER v2.1.0                  ║
+║           PERSISTENT SESSIONS ENABLED                   ║
 ╚══════════════════════════════════════════════════════════╝
   
   🚀 Server running on port: ${PORT}
-  📁 Static files from: ${path.join(__dirname, 'public')}
-  🔧 API Base URL: http://localhost:${PORT}/api
   🌍 Environment: ${process.env.NODE_ENV || 'development'}
+  📁 Static files: ${path.join(__dirname, 'public')}
+  🔧 API Base URL: http://localhost:${PORT}/api
   
-  🔍 Search Endpoints:
-  ├── /api/products/search            - Search products
-  ├── /api/products/search/suggestions - Real-time suggestions
-  ├── /api/products/discounted        - Discounted products
-  ├── /api/products/popular           - Popular products
+  🔐 SESSION CONFIGURATION:
+  ├── Store: MongoDB
+  ├── Cookie maxAge: 30 days (persistent)
+  ├── Cookie secure: ${isProduction}
+  ├── Cookie sameSite: ${isProduction ? 'none' : 'lax'}
+  ├── Rolling sessions: Enabled
+  └── Auto-refresh: Enabled
   
-  🔐 Auth Endpoints:
-  ├── /api/auth/register              - User registration
-  ├── /api/auth/login                 - User login
-  ├── /api/auth/logout                - User logout
-  ├── /api/auth/status                - Auth status
-  ├── /api/auth/forgot-password       - Forgot password
-  ├── /api/auth/reset-password        - Reset password
-  ├── /api/auth/check-email           - Check email exists
+  📊 FEATURES:
+  ├── Persistent user sessions (30 days)
+  ├── MongoDB session store
+  ├── Auto session refresh
+  ├── Keep-alive endpoints
+  ├── LocalStorage fallback
+  ├── Offline support
+  └── Cross-tab sync
   
-  📊 Product Endpoints:
-  ├── /api/products                   - All products
-  ├── /api/products/category/:category - Products by category
-  ├── /api/products/:id               - Single product
+  🔐 AUTH ENDPOINTS:
+  ├── /api/auth/login        - Login with remember me
+  ├── /api/auth/register     - Register new user
+  ├── /api/auth/logout       - Logout
+  ├── /api/auth/status       - Check auth status
+  ├── /api/auth/refresh      - Refresh session
+  ├── /api/auth/keep-alive   - Keep session alive
+  ├── /api/auth/session-info - Get session info
   
-  📝 Inquiry Endpoints:
-  ├── /api/inquiries                  - Submit inquiry
-  ├── /api/user/inquiries             - User inquiries
+  📊 PRODUCT ENDPOINTS:
+  ├── /api/products          - All products
+  ├── /api/products/search   - Search products
+  ├── /api/products/:id      - Single product
   
-  👤 User Endpoints:
-  ├── /api/users/:id                  - Get user profile
-  ├── /api/users/:id                  - Update user profile
+  👤 USER ENDPOINTS:
+  ├── /api/users/:id         - Get user profile
+  ├── /api/user/inquiries    - User inquiries
   
-  🐛 Debug Endpoints:
-  ├── /api/debug/session              - Session info
-  ├── /api/debug/cookies              - Cookie info
-  ├── /api/debug/db                   - Database info
-  ├── /api/test/inquiries             - Test inquiries
-  ├── /api/test                       - Test endpoint
+  🐛 DEBUG ENDPOINTS:
+  ├── /api/debug/session     - Session info
+  ├── /api/debug/cookies     - Cookie info
+  ├── /api/debug/db          - Database info
   
-  💪 Health Check:
-  └── /api/health                     - Server health
+  💪 HEALTH CHECK:
+  └── /api/health            - Server health
   
-  👤 User login: http://localhost:${PORT}/login
-  🔐 Reset password: http://localhost:${PORT}/reset-password
-  🏪 Products page: http://localhost:${PORT}/categories.html
-  👤 Account page: http://localhost:${PORT}/account
+  ⚠️  IMPORTANT:
+  ├── Set SESSION_SECRET in production
+  ├── Set MONGODB_URI for session store
+  ├── Use HTTPS in production
+  └── Enable CORS for your frontend domains
   
-  ⚠️  Important: For production, set SESSION_SECRET and MONGODB_URI environment variables
-  
-  ✅ Server is ready!`);
+  ✅ Server is ready with persistent sessions!
+  ✅ Users will stay logged in for 30 days!
+  ✅ Sessions survive browser restarts!
+  ✅ Cross-tab session sync enabled!`);
 });
 
 // Graceful shutdown
