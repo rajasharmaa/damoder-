@@ -12,54 +12,99 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enhanced CORS configuration
+// Trust proxy for production (Render/Heroku)
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+// Enhanced CORS configuration for cross-origin
 app.use(cors({
-  origin: [
-    'http://localhost:3000', 
-    'http://127.0.0.1:5500', 
-    'http://localhost:3001',
-    'http://localhost:8080',
-    'https://damoder-traders-x2iy.vercel.app',
-    'https://damodertraders.onrender.com'
-  ],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin && process.env.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    
+    const allowedOrigins = [
+      'http://localhost:3000', 
+      'http://127.0.0.1:5500', 
+      'http://localhost:3001',
+      'http://localhost:8080',
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'https://damoder-traders-x2iy.vercel.app',
+      'https://damodertraders.onrender.com',
+      'https://*.vercel.app'
+    ];
+    
+    // Allow all vercel subdomains
+    if (origin && (allowedOrigins.indexOf(origin) !== -1 || 
+        origin.endsWith('.vercel.app') || 
+        origin.includes('localhost'))) {
+      callback(null, true);
+    } else {
+      console.log('⚠️  Blocked CORS for origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Expires', 'Cache-Control', 'Accept', 'Origin', 'X-Requested-With'],
-  exposedHeaders: ['Content-Length', 'X-Total-Count'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'Accept', 
+    'Origin', 
+    'X-Requested-With', 
+    'X-CSRF-Token',
+    'Cache-Control',
+    'Expires',
+    'Pragma'
+  ],
+  exposedHeaders: ['Content-Length', 'X-Total-Count', 'Set-Cookie'],
   credentials: true,
-  maxAge: 86400 // 24 hours
+  maxAge: 86400,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
-// Handle preflight requests
+// Handle preflight requests explicitly
 app.options('*', cors());
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Session configuration for production
+// Session configuration optimized for cross-origin
+const isProduction = process.env.NODE_ENV === 'production';
 const sessionConfig = {
-  secret: process.env.SESSION_SECRET || 'user123',
-  resave: true,
-  saveUninitialized: false,
+  secret: process.env.SESSION_SECRET || 'damodar-traders-secret-key-2024',
+  resave: false, // Don't save session if unmodified
+  saveUninitialized: false, // Don't create session until something stored
+  proxy: isProduction, // Trust reverse proxy in production
+  name: 'dt_session_id', // Custom session cookie name
   cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    maxAge: 24 * 60 * 60 * 1000
-  }
+    secure: isProduction, // HTTPS only in production
+    httpOnly: true, // Prevent client-side JS access
+    sameSite: isProduction ? 'none' : 'lax', // Required for cross-origin
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    // Don't set domain for cross-origin compatibility
+    path: '/',
+    // Additional security for production
+    ...(isProduction && { 
+      domain: '.damodertraders.onrender.com', // Allow subdomains
+    })
+  },
+  // Optional: Add session store for production (Redis recommended)
+  // store: sessionStore
 };
 
-// If using Redis in production (uncomment if you have Redis)
-// if (process.env.REDIS_URL) {
-//   const RedisStore = require('connect-redis').default;
-//   const redis = require('redis');
-//   const redisClient = redis.createClient({
-//     url: process.env.REDIS_URL
-//   });
-//   redisClient.connect().catch(console.error);
-//   sessionConfig.store = new RedisStore({ client: redisClient });
-// }
+// Log session config for debugging
+console.log('Session Configuration:', {
+  isProduction,
+  cookieSecure: sessionConfig.cookie.secure,
+  cookieSameSite: sessionConfig.cookie.sameSite,
+  cookieDomain: sessionConfig.cookie.domain
+});
 
 app.use(session(sessionConfig));
 
@@ -74,12 +119,24 @@ function isValidObjectId(id) {
 
 // User auth middleware
 function requireUserAuth(req, res, next) {
+  console.log('Auth check - Session user:', req.session.user);
+  console.log('Auth check - Session ID:', req.sessionID);
+  console.log('Auth check - Cookies:', req.cookies);
+  
   if (!req.session.user) {
+    console.log('❌ User not authenticated');
     if (req.headers.accept && req.headers.accept.includes('application/json')) {
-      return res.status(401).json({ error: 'Unauthorized' });
+      return res.status(401).json({ 
+        authenticated: false,
+        error: 'Unauthorized - Please login first' 
+      });
     }
-    return res.status(401).json({ error: 'Please login first' });
+    return res.status(401).json({ 
+      authenticated: false,
+      error: 'Please login first' 
+    });
   }
+  console.log('✅ User authenticated:', req.session.user.email);
   next();
 }
 
@@ -89,8 +146,10 @@ app.get('/api/auth/status', (req, res) => {
   console.log('Session ID:', req.sessionID);
   console.log('Session user:', req.session.user);
   console.log('Origin:', req.headers.origin);
+  console.log('Cookies received:', req.headers.cookie);
   
   if (req.session.user) {
+    console.log('✅ Returning authenticated user');
     res.json({ 
       authenticated: true, 
       user: {
@@ -101,14 +160,19 @@ app.get('/api/auth/status', (req, res) => {
       }
     });
   } else {
-    console.log('No user in session, returning unauthenticated');
-    res.json({ authenticated: false });
+    console.log('❌ No user in session');
+    res.json({ 
+      authenticated: false,
+      message: 'Not authenticated'
+    });
   }
 });
 
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
+    
+    console.log('Registration attempt:', { name, email });
     
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'Name, email and password are required' });
@@ -140,20 +204,32 @@ app.post('/api/auth/register', async (req, res) => {
     
     // Create session
     req.session.user = {
-      id: result.insertedId,
+      id: result.insertedId.toString(),
       email: newUser.email,
       name: newUser.name,
       role: 'user'
     };
     
-    res.status(201).json({ 
-      message: 'Registration successful',
-      user: {
-        id: result.insertedId,
-        name: newUser.name,
-        email: newUser.email
+    // Save session explicitly
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.status(500).json({ error: 'Failed to create session' });
       }
+      
+      console.log('✅ Registration successful for:', newUser.email);
+      console.log('Session after registration:', req.session);
+      
+      res.status(201).json({ 
+        message: 'Registration successful',
+        user: {
+          id: result.insertedId,
+          name: newUser.name,
+          email: newUser.email
+        }
+      });
     });
+    
   } catch (err) {
     console.error('Registration error:', err);
     res.status(500).json({ error: 'Registration failed' });
@@ -163,9 +239,10 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     console.log('=== LOGIN ATTEMPT ===');
-    console.log('Request body:', req.body);
+    console.log('Request body:', { email: req.body.email, password: '***' });
     console.log('Session ID:', req.sessionID);
     console.log('Origin:', req.headers.origin);
+    console.log('Cookies received:', req.headers.cookie);
     
     const { email, password } = req.body;
     
@@ -196,21 +273,31 @@ app.post('/api/auth/login', async (req, res) => {
     
     // Create session
     req.session.user = {
-      id: user._id,
+      id: user._id.toString(),
       email: user.email,
       name: user.name,
       role: user.role
     };
     
     // Save session
-    req.session.save(err => {
+    req.session.save((err) => {
       if (err) {
         console.error('Session save error:', err);
         return res.status(500).json({ error: 'Failed to create session' });
       }
       
-      console.log('Login successful for user:', user.email);
+      console.log('✅ Login successful for user:', user.email);
       console.log('Session after login:', req.session);
+      console.log('Session cookie details:', req.session.cookie);
+      
+      // Set additional cookie for debugging
+      res.cookie('dt_logged_in', 'true', {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: false, // Allow JS access for debugging
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        path: '/'
+      });
       
       res.json({ 
         message: 'Login successful',
@@ -219,6 +306,10 @@ app.post('/api/auth/login', async (req, res) => {
           name: user.name,
           email: user.email,
           phone: user.phone
+        },
+        session: {
+          id: req.sessionID,
+          cookie: req.session.cookie
         }
       });
     });
@@ -234,13 +325,32 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 app.post('/api/auth/logout', (req, res) => {
-  req.session.destroy(err => {
+  console.log('=== LOGOUT ===');
+  console.log('Session before logout:', req.session.user);
+  
+  req.session.destroy((err) => {
     if (err) {
       console.error('Logout error:', err);
       return res.status(500).json({ error: 'Logout failed' });
     }
-    res.clearCookie('connect.sid');
-    res.json({ message: 'Logout successful' });
+    
+    // Clear the session cookie
+    res.clearCookie('dt_session_id', {
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.damodertraders.onrender.com' : undefined
+    });
+    
+    // Clear debug cookie
+    res.clearCookie('dt_logged_in', {
+      path: '/',
+      domain: process.env.NODE_ENV === 'production' ? '.damodertraders.onrender.com' : undefined
+    });
+    
+    console.log('✅ Logout successful');
+    res.json({ 
+      message: 'Logout successful',
+      timestamp: new Date().toISOString()
+    });
   });
 });
 
@@ -537,7 +647,7 @@ app.get('/api/products/search/suggestions', async (req, res) => {
   }
 });
 
-// Get single product by ID - FIXED VERSION
+// Get single product by ID
 app.get('/api/products/:id', async (req, res) => {
   try {
     // Validate ObjectId format
@@ -570,7 +680,7 @@ app.get('/api/products/:id', async (req, res) => {
   }
 });
 
-// Get products with discount - FIXED VERSION
+// Get products with discount
 app.get('/api/products/discounted', async (req, res) => {
   try {
     const db = await connectToDB();
@@ -584,19 +694,16 @@ app.get('/api/products/discounted', async (req, res) => {
     res.json(discountedProducts || []);
   } catch (err) {
     console.error('Error fetching discounted products:', err);
-    // Return empty array instead of error for better UX
     res.json([]);
   }
 });
 
-// Get popular products - FIXED VERSION
+// Get popular products
 app.get('/api/products/popular', async (req, res) => {
   try {
     const db = await connectToDB();
     const productsCollection = db.collection('products');
     
-    // For now, return products with highest discount
-    // You can modify this to use actual popularity metrics
     const popularProducts = await productsCollection.find({ 
       discount: { $exists: true, $ne: null, $gt: 0 } 
     }).sort({ discount: -1 }).limit(10).toArray();
@@ -604,7 +711,6 @@ app.get('/api/products/popular', async (req, res) => {
     res.json(popularProducts || []);
   } catch (err) {
     console.error('Error fetching popular products:', err);
-    // Return empty array instead of error for better UX
     res.json([]);
   }
 });
@@ -709,7 +815,6 @@ app.get('/api/user/inquiries', requireUserAuth, async (req, res) => {
       return res.json([]);
     }
     
-    // Return empty array for any other errors
     res.json([]);
   }
 });
@@ -721,7 +826,7 @@ app.get('/api/users/:id', requireUserAuth, async (req, res) => {
     // Validate ObjectId format
     if (!isValidObjectId(req.params.id)) {
       console.warn(`Invalid user ID format: ${req.params.id}`);
-      return res.json(null); // Return null instead of error
+      return res.json(null);
     }
     
     const db = await connectToDB();
@@ -732,7 +837,7 @@ app.get('/api/users/:id', requireUserAuth, async (req, res) => {
     }, { projection: { password: 0 } });
     
     if (!user) {
-      return res.json(null); // Return null instead of 404
+      return res.json(null);
     }
     
     // Check if requesting user owns this profile
@@ -750,7 +855,7 @@ app.get('/api/users/:id', requireUserAuth, async (req, res) => {
       return res.json(null);
     }
     
-    res.json(null); // Return null for any errors
+    res.json(null);
   }
 });
 
@@ -807,7 +912,7 @@ app.put('/api/users/:id', requireUserAuth, async (req, res) => {
   }
 });
 
-// ==================== DEBUG ENDPOINTS ====================
+// ==================== DEBUG & TEST ENDPOINTS ====================
 
 app.get('/api/debug/session', (req, res) => {
   res.json({
@@ -815,7 +920,25 @@ app.get('/api/debug/session', (req, res) => {
     session: req.session,
     user: req.session.user,
     cookies: req.cookies,
+    headers: {
+      origin: req.headers.origin,
+      cookie: req.headers.cookie,
+      'user-agent': req.headers['user-agent']
+    },
     timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/api/debug/cookies', (req, res) => {
+  res.json({
+    cookies: req.cookies,
+    sessionId: req.sessionID,
+    session: req.session,
+    headers: {
+      origin: req.headers.origin,
+      cookie: req.headers.cookie,
+      'user-agent': req.headers['user-agent']
+    }
   });
 });
 
@@ -863,6 +986,24 @@ app.get('/api/test/inquiries', async (req, res) => {
   }
 });
 
+// Test endpoint for CORS and connectivity
+app.get('/api/test', (req, res) => {
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    cors: {
+      origin: req.headers.origin,
+      allowed: true
+    },
+    session: {
+      id: req.sessionID,
+      hasUser: !!req.session.user
+    },
+    cookies: req.cookies,
+    message: 'API is working correctly'
+  });
+});
+
 // ==================== HEALTH CHECK ====================
 
 app.get('/api/health', (req, res) => {
@@ -874,6 +1015,10 @@ app.get('/api/health', (req, res) => {
     cors: {
       origin: req.headers.origin,
       allowed: true
+    },
+    session: {
+      id: req.sessionID,
+      hasUser: !!req.session.user
     },
     features: [
       'product-search',
@@ -888,19 +1033,6 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Simple test endpoint
-app.get('/api/test', (req, res) => {
-  res.json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    cors: {
-      origin: req.headers.origin,
-      allowed: true
-    },
-    message: 'API is working correctly'
-  });
-});
-
 // ==================== SERVER STARTUP ====================
 
 app.listen(PORT, async () => {
@@ -912,6 +1044,7 @@ app.listen(PORT, async () => {
   🚀 Server running on port: ${PORT}
   📁 Static files from: ${path.join(__dirname, 'public')}
   🔧 API Base URL: http://localhost:${PORT}/api
+  🌍 Environment: ${process.env.NODE_ENV || 'development'}
   
   🔍 Search Endpoints:
   ├── /api/products/search            - Search products
@@ -943,8 +1076,10 @@ app.listen(PORT, async () => {
   
   🐛 Debug Endpoints:
   ├── /api/debug/session              - Session info
+  ├── /api/debug/cookies              - Cookie info
   ├── /api/debug/db                   - Database info
   ├── /api/test/inquiries             - Test inquiries
+  ├── /api/test                       - Test endpoint
   
   💪 Health Check:
   └── /api/health                     - Server health
@@ -953,6 +1088,8 @@ app.listen(PORT, async () => {
   🔐 Reset password: http://localhost:${PORT}/reset-password
   🏪 Products page: http://localhost:${PORT}/categories.html
   👤 Account page: http://localhost:${PORT}/account
+  
+  ⚠️  Important: For production, set SESSION_SECRET and MONGODB_URI environment variables
   
   ✅ Server is ready!`);
 });
