@@ -24,6 +24,29 @@
 
   
 
+    /* Mobile menu button styles */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #333;
+      cursor: pointer;
+      padding: 10px;
+      z-index: 1001;
+    }
+
+    .nav-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 998;
+    }
+
     .line {
       border: none;
       height: 1px;
@@ -223,6 +246,39 @@
       max-width: 500px;
       margin: 0 auto;
     }
+
+
+    /* Quick Filters */
+    .quick-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .quick-filter-btn {
+      padding: 8px 20px;
+      background: #f0f0f0;
+      border: 2px solid #e0e0e0;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .quick-filter-btn:hover {
+      background: #e0e0e0;
+      border-color: #2a5f8a;
+      color: #2a5f8a;
+    }
+
+    .quick-filter-btn.active {
+      background: #2a5f8a !important;
+      border-color: #2a5f8a !important;
+      color: white !important;
+    }
+
 
     .category-section {
       margin: 50px 0;
@@ -437,6 +493,84 @@
     /* Mobile menu styles */
     @media (max-width: 768px) {
      
+
+      .mobile-menu-btn {
+        display: block;
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+      
+      nav {
+        position: relative;
+        padding: 15px 20px;
+        justify-content: space-between;
+      }
+      
+      nav > ul {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 280px;
+        height: 100%;
+        background: white;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 80px 20px 20px;
+        transition: right 0.3s ease;
+        z-index: 1000;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      }
+      
+      nav > ul.active {
+        right: 0;
+      }
+      
+      .nav-overlay.active {
+        display: block;
+      }
+      
+      nav ul li {
+        width: 100%;
+        margin: 5px 0;
+      }
+      
+      nav ul li a {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 12px 15px;
+      }
+      
+      .nav-product {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+      }
+      
+      .nav-product > a {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .product-dropdown {
+        position: static;
+        box-shadow: none;
+        display: none;
+        width: 100%;
+        opacity: 1;
+        transform: none;
+        margin-top: 5px;
+        background: #f9f9f9;
+      }
+      
+      .nav-product.active .product-dropdown {
+        display: block;
+      }
+      
+
       .product-dropdown a {
         padding-left: 30px;
       }
@@ -563,6 +697,18 @@
         </button>
       </div>
 
+
+      <!-- Quick Filters -->
+      <div class="quick-filters">
+        <button class="quick-filter-btn" data-category="pipes">Pipes</button>
+        <button class="quick-filter-btn" data-category="fittings">Fittings</button>
+        <button class="quick-filter-btn" data-category="valves">Valves</button>
+        <button class="quick-filter-btn" data-category="other">Other</button>
+        
+        <button class="quick-filter-btn active" id="showAllButton">Show All</button>
+      </div>
+
+
       <!-- Search Results Info -->
       <div class="search-results-info" id="searchResultsInfo" style="display: none;">
         <div class="results-count" id="resultsCount"></div>
@@ -628,6 +774,7 @@
     <button class="view-more-btn" id="viewMoreBtn">View More Products</button>
   </div>
 
+<<<<<<< HEAD
  <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -895,15 +1042,347 @@
         sizeOptions: [{ size: '1 inch', price: 45 }, { size: '2 inch', price: 75 }],
         discount: 0,
         material: 'Foam'
+
+  <script src="https://cdn.jsdelivr.net/npm/locomotive-scroll@3.5.4/dist/locomotive-scroll.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script>
+    // Mobile menu functionality
+    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navMenu');
+    const navOverlay = document.getElementById('navOverlay');
+
+    // Check if elements exist before adding event listeners
+    if (mobileMenuBtn && navMenu && navOverlay) {
+      mobileMenuBtn.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        navOverlay.classList.toggle('active');
+      });
+
+      navOverlay.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        navOverlay.classList.remove('active');
+      });
+
+      // Toggle product dropdown on mobile
+      const navProducts = document.querySelectorAll('.nav-product');
+      navProducts.forEach(item => {
+        item.addEventListener('click', (e) => {
+          if (window.innerWidth <= 768) {
+            e.preventDefault();
+            item.classList.toggle('active');
+          }
+        });
+      });
+    }
+
+    // Industrial background animation
+    function createIndustrialBackground() {
+      const pipesContainer = document.querySelector('.pipes-container');
+      const particlesContainer = document.querySelector('.particles-container');
+      const colors = ['rgba(58, 123, 213, 0.1)', 'rgba(65, 131, 215, 0.15)', 'rgba(72, 139, 217, 0.2)'];
+      
+      // Create horizontal pipes
+      for (let i = 0; i < 8; i++) {
+        const pipe = document.createElement('div');
+        pipe.className = 'pipe';
+        pipesContainer.appendChild(pipe);
+        
+        const isVertical = Math.random() > 0.5;
+        const duration = gsap.utils.random(30, 50);
+        const size = gsap.utils.random(10, 30);
+        const length = gsap.utils.random(200, 400);
+        
+        gsap.set(pipe, {
+          width: isVertical ? `${size}px` : `${length}px`,
+          height: isVertical ? `${length}px` : `${size}px`,
+          background: colors[Math.floor(Math.random() * colors.length)],
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : -length,
+          y: isVertical ? -length : gsap.utils.random(0, window.innerHeight)
+        });
+        
+        gsap.to(pipe, {
+          x: isVertical ? gsap.utils.random(0, window.innerWidth) : window.innerWidth + length,
+          y: isVertical ? window.innerHeight + length : gsap.utils.random(0, window.innerHeight),
+          duration: duration,
+          ease: "none",
+          repeat: -1
+        });
+      }
+      
+      // Create pipe connectors
+      for (let i = 0; i < 15; i++) {
+        const connector = document.createElement('div');
+        connector.className = 'pipe-connector';
+        pipesContainer.appendChild(connector);
+        
+        const size = gsap.utils.random(15, 40);
+        
+        gsap.set(connector, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        gsap.to(connector, {
+          opacity: 0.3,
+          duration: gsap.utils.random(3, 6),
+          yoyo: true,
+          repeat: -1,
+          delay: gsap.utils.random(0, 5)
+        });
+      }
+      
+      // Create floating particles (weld sparks)
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particlesContainer.appendChild(particle);
+        
+        const size = gsap.utils.random(2, 6);
+        
+        gsap.set(particle, {
+          width: `${size}px`,
+          height: `${size}px`,
+          x: gsap.utils.random(0, window.innerWidth),
+          y: gsap.utils.random(0, window.innerHeight),
+          opacity: 0
+        });
+        
+        // Spark animation
+        const tl = gsap.timeline({ repeat: -1, delay: gsap.utils.random(0, 5) });
+        tl.to(particle, {
+          opacity: 0.8,
+          duration: 0.3,
+          ease: "power1.out"
+        })
+        .to(particle, {
+          x: "+=50",
+          y: "+=50",
+          duration: 0.8,
+          ease: "power1.inOut"
+        })
+        .to(particle, {
+          opacity: 0,
+          duration: 0.3,
+          ease: "power1.in"
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Initialize industrial background
+      if (document.querySelector('.pipes-container')) {
+        createIndustrialBackground();
+      }
+      
+      // Make background responsive to window resize
+      window.addEventListener('resize', () => {
+        if (document.querySelector('.pipes-container')) {
+          document.querySelector('.pipes-container').innerHTML = '';
+          document.querySelector('.particles-container').innerHTML = '';
+          createIndustrialBackground();
+        }
+      });
+
+      const API_BASE_URL = 'https://damodertraders.onrender.com/api';
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get('category');
+      const showAll = urlParams.get('showAll');
+      const searchQuery = urlParams.get('search');
+      const defaultImage = "assets/Screenshot_2025-06-19_201249-removebg-preview.png";
+
+      // Search state
+      let currentSearchQuery = searchQuery || '';
+      let debounceTimer;
+
+      // Store all products globally
+      let allProducts = [];
+
+      // If a specific category is selected, show only that category
+      if (category) {
+        document.querySelectorAll('.category-section').forEach(section => {
+          if (!section.id.startsWith(category)) {
+            section.style.display = 'none';
+          }
+        });
+        document.getElementById('viewMoreBtn').style.display = 'none';
+        document.querySelector('.categories-header h1').textContent = `${category.charAt(0).toUpperCase() + category.slice(1)} Products`;
+        
+        // Set the corresponding filter button as active
+        setTimeout(() => {
+          const activeButton = document.querySelector(`.quick-filter-btn[data-category="${category}"]`);
+          if (activeButton) {
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            activeButton.classList.add('active');
+            document.getElementById('showAllButton').classList.remove('active');
+          }
+        }, 100);
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
       }
     ];
 
+<<<<<<< HEAD
     // Helper function to hide search suggestions
     function hideSuggestions() {
       const searchSuggestions = document.getElementById('searchSuggestions');
       if (searchSuggestions) {
         searchSuggestions.classList.remove('show');
         searchSuggestions.innerHTML = '';
+=======
+      // More comprehensive fallback data
+      const fallbackProducts = [
+        {
+          _id: '1',
+          name: 'PVC Pipe',
+          category: 'pipes',
+          description: 'High-quality PVC pipe for industrial use',
+          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1 inch', price: 150 }, { size: '2 inch', price: 250 }],
+          discount: 0,
+          material: 'PVC'
+        },
+        {
+          _id: '2',
+          name: 'Elbow Fitting',
+          category: 'fittings',
+          description: '90-degree elbow fitting for pipe connections',
+          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1/2 inch', price: 45 }, { size: '3/4 inch', price: 60 }],
+          discount: 0,
+          material: 'Steel'
+        },
+        {
+          _id: '3',
+          name: 'Ball Valve',
+          category: 'valves',
+          description: 'Durable ball valve for fluid control',
+          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1 inch', price: 120 }, { size: '2 inch', price: 200 }],
+          discount: 10,
+          material: 'Brass'
+        },
+        {
+          _id: '4',
+          name: 'Pipe Clamp',
+          category: 'other',
+          description: 'Sturdy pipe clamp for secure installations',
+          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: 'Standard', price: 25 }],
+          discount: 0,
+          material: 'Steel'
+        },
+        {
+          _id: '5',
+          name: 'Copper Pipe',
+          category: 'pipes',
+          description: 'Premium copper pipe for plumbing applications',
+          image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1/2 inch', price: 300 }, { size: '1 inch', price: 550 }],
+          discount: 15,
+          material: 'Copper'
+        },
+        {
+          _id: '6',
+          name: 'Tee Fitting',
+          category: 'fittings',
+          description: 'T-shaped fitting for pipe connections',
+          image: 'https://images.unsplash.com/photo-1581092580497-e0d4cb184827?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
+          sizeOptions: [{ size: '1/2 inch', price: 35 }, { size: '3/4 inch', price: 50 }],
+          discount: 0,
+          material: 'Stainless Steel'
+        }
+      ];
+
+      // Helper function to hide search suggestions
+      function hideSuggestions() {
+        const searchSuggestions = document.getElementById('searchSuggestions');
+        if (searchSuggestions) {
+          searchSuggestions.classList.remove('show');
+          searchSuggestions.innerHTML = '';
+        }
+      }
+
+      // Load products with better error handling
+      async function loadProducts(searchTerm = '', categoryFilter = '', discountFilter = false) {
+        let products = [];
+
+        try {
+          // Show loading state
+          showLoadingState();
+
+          // Hide no search results message
+          document.getElementById('noSearchResults').style.display = 'none';
+
+          let endpoint = '/products';
+          let params = new URLSearchParams();
+
+          if (searchTerm) {
+            params.append('search', searchTerm);
+          }
+
+          if (categoryFilter) {
+            params.append('category', categoryFilter);
+          }
+
+          if (category) {
+            params.append('category', category);
+          }
+
+          if (params.toString()) {
+            endpoint = `/products/search?${params.toString()}`;
+          } else if (discountFilter) {
+            // Use discounted endpoint if only discount filter is active
+            endpoint = '/products/discounted';
+          }
+
+          const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+          }
+
+          const apiProducts = await response.json();
+
+          if (Array.isArray(apiProducts)) {
+            products = apiProducts;
+            // Store products for filtering
+            allProducts = products;
+            localStorage.setItem('productDetails', JSON.stringify(products));
+          }
+        } catch (error) {
+          console.error('Error loading products:', error);
+          // If no products loaded yet, use fallback
+          if (products.length === 0) {
+            products = filterFallbackProducts(searchTerm, categoryFilter);
+            allProducts = products;
+            console.warn('Using fallback product data');
+          }
+        } finally {
+          // Apply discount filter if needed
+          if (discountFilter && endpoint !== '/products/discounted') {
+            products = products.filter(product => product.discount && product.discount > 0);
+          }
+          
+          displayProducts(products);
+
+          // Update search results info
+          if (searchTerm || categoryFilter || discountFilter) {
+            const filterType = categoryFilter || (discountFilter ? 'on sale' : searchTerm);
+            updateSearchResultsInfo(products.length, filterType);
+          }
+
+          hideLoadingState();
+        }
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
       }
     }
 
@@ -961,6 +1440,7 @@
         console.error('Error loading products:', error);
         // If no products loaded yet, use fallback
         if (products.length === 0) {
+<<<<<<< HEAD
           products = filterFallbackProducts(searchTerm, category || categoryFilter);
           allProducts = products;
           console.warn('Using fallback product data');
@@ -972,6 +1452,22 @@
         if (searchTerm || category || categoryFilter) {
           const filterType = category || categoryFilter || searchTerm;
           updateSearchResultsInfo(products.length, filterType);
+=======
+          if (currentSearchQuery || isFilterActive()) {
+            // Show no search results message
+            document.getElementById('noSearchResults').style.display = 'block';
+            document.querySelectorAll('.category-section').forEach(section => {
+              section.style.display = 'none';
+            });
+            document.getElementById('viewMoreBtn').style.display = 'none';
+          } else {
+            showErrorMessage('No products available');
+          }
+          return;
+        } else {
+          // Hide no search results message
+          document.getElementById('noSearchResults').style.display = 'none';
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
         }
 
         hideLoadingState();
@@ -984,8 +1480,17 @@
         return fallbackProducts;
       }
 
+<<<<<<< HEAD
       const searchTermLower = searchTerm ? searchTerm.toLowerCase() : '';
       const categoryFilterLower = categoryFilter ? categoryFilter.toLowerCase() : '';
+=======
+        // Display products in their respective sections
+        for (const [cat, categoryProducts] of Object.entries(productsByCategory)) {
+          const gridElement = document.getElementById(`${cat}-grid`);
+          const sectionElement = document.getElementById(`${cat}-section`);
+          
+          if (!gridElement) continue;
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
 
       return fallbackProducts.filter(product => {
         const matchesSearch = !searchTerm ||
@@ -994,6 +1499,7 @@
           product.description.toLowerCase().includes(searchTermLower) ||
           product.material.toLowerCase().includes(searchTermLower);
 
+<<<<<<< HEAD
         const matchesCategory = !categoryFilter ||
           product.category.toLowerCase() === categoryFilterLower;
 
@@ -1045,6 +1551,100 @@
             section.style.display = 'none';
           });
           document.getElementById('viewMoreBtn').style.display = 'none';
+=======
+          // Determine how many products to show
+          const productsToShow = (showAll || window.location.search.includes('category') || currentSearchQuery || isFilterActive()) ?
+            categoryProducts :
+            categoryProducts.slice(0, 4);
+
+          if (productsToShow.length === 0) {
+            gridElement.innerHTML = '<div class="no-products">No products available in this category</div>';
+            if (sectionElement && isFilterActive() && !category) {
+              sectionElement.style.display = 'none';
+            }
+            continue;
+          }
+
+          // Show the section if it has products
+          if (sectionElement) {
+            sectionElement.style.display = 'block';
+          }
+
+          productsToShow.forEach(product => {
+            const productCard = createProductCard(product);
+            gridElement.appendChild(productCard);
+          });
+        }
+        
+        // Show all sections if not filtering
+        if (!currentSearchQuery && !category && !isFilterActive()) {
+          document.querySelectorAll('.category-section').forEach(section => {
+            section.style.display = 'block';
+          });
+          document.getElementById('viewMoreBtn').style.display = 'block';
+        } else {
+          document.getElementById('viewMoreBtn').style.display = 'none';
+        }
+      }
+
+      function createProductCard(product) {
+        const productCard = document.createElement('a');
+        productCard.href = `product-details.html?id=${product._id}`;
+        productCard.className = 'product-card';
+
+        // Product image
+        const productImage = document.createElement('div');
+        productImage.className = 'product-image';
+        const img = document.createElement('img');
+        img.src = product.image || product.imagePath || defaultImage;
+        img.alt = product.name || 'Product Image';
+        img.loading = "lazy";
+        img.onerror = function () {
+          this.src = defaultImage;
+        };
+        productImage.appendChild(img);
+
+        // Product info
+        const productInfo = document.createElement('div');
+        productInfo.className = 'product-info';
+
+        const productName = document.createElement('h3');
+        productName.className = 'product-name';
+        productName.textContent = product.name || 'Unnamed Product';
+
+        const productPrice = document.createElement('div');
+        productPrice.className = 'product-price';
+
+        // Get the first available price if sizeOptions exist
+        let price = 0;
+        if (product.sizeOptions && product.sizeOptions.length > 0 && product.sizeOptions[0].price) {
+          price = product.sizeOptions[0].price;
+        }
+
+        if (price > 0) {
+          const currentPrice = document.createElement('span');
+          currentPrice.className = 'current-price';
+
+          if (product.discount && product.discount > 0) {
+            const discountedPrice = price * (1 - product.discount / 100);
+            currentPrice.textContent = `₹${discountedPrice.toFixed(2)}`;
+
+            const originalPrice = document.createElement('span');
+            originalPrice.className = 'original-price';
+            originalPrice.textContent = `₹${price.toFixed(2)}`;
+
+            const discountBadge = document.createElement('span');
+            discountBadge.className = 'discount-badge';
+            discountBadge.textContent = `${product.discount}% OFF`;
+
+            productPrice.appendChild(originalPrice);
+            productPrice.appendChild(currentPrice);
+            productPrice.appendChild(discountBadge);
+          } else {
+            currentPrice.textContent = `₹${price.toFixed(2)}`;
+            productPrice.appendChild(currentPrice);
+          }
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
         } else {
           showErrorMessage('No products available at the moment. Please check back later.');
         }
@@ -1276,6 +1876,7 @@
         }, 300);
       });
 
+<<<<<<< HEAD
       // Clear search
       clearSearchButton.addEventListener('click', () => {
         searchInput.value = '';
@@ -1299,11 +1900,28 @@
           // Load products for the category
           loadProducts('', category);
         } else {
+=======
+        // Clear search
+        clearSearchButton.addEventListener('click', () => {
+          searchInput.value = '';
+          currentSearchQuery = '';
+          hideSuggestions();
+          document.getElementById('searchResultsInfo').style.display = 'none';
+          document.getElementById('noSearchResults').style.display = 'none';
+          
+          // Reset all filters
+          document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+          });
+          document.getElementById('showAllButton').classList.add('active');
+          
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
           // Show all sections
           document.querySelectorAll('.category-section').forEach(section => {
             section.style.display = 'block';
           });
           document.getElementById('viewMoreBtn').style.display = 'block';
+<<<<<<< HEAD
           
           // Load all products
           loadProducts();
@@ -1311,6 +1929,201 @@
 
         // Update URL
         updateURL();
+=======
+
+          // Update URL and load all products
+          updateURL();
+          loadProducts();
+        });
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.search-input-wrapper')) {
+            hideSuggestions();
+          }
+        });
+
+        function performSearch() {
+          const query = searchInput.value.trim();
+          currentSearchQuery = query;
+
+          if (query) {
+            // Reset filter buttons when searching
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            document.getElementById('showAllButton').classList.add('active');
+            
+            loadProducts(query);
+            updateURL();
+            hideSuggestions();
+          } else {
+            // If search is empty, load all products
+            currentSearchQuery = '';
+            document.getElementById('searchResultsInfo').style.display = 'none';
+            document.getElementById('noSearchResults').style.display = 'none';
+            loadProducts();
+            updateURL();
+          }
+        }
+
+        function showSuggestions(suggestions, query) {
+          if (!suggestions || suggestions.length === 0) {
+            hideSuggestions();
+            return;
+          }
+
+          searchSuggestions.innerHTML = '';
+
+          suggestions.forEach(suggestion => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+
+            suggestionItem.innerHTML = `
+              <div class="suggestion-name">${highlightText(suggestion.name, query)}</div>
+              <div class="suggestion-category">${suggestion.category || 'Product'}</div>
+            `;
+
+            suggestionItem.addEventListener('click', () => {
+              searchInput.value = suggestion.name;
+              performSearch();
+            });
+
+            searchSuggestions.appendChild(suggestionItem);
+          });
+
+          searchSuggestions.classList.add('show');
+        }
+
+        function highlightText(text, query) {
+          if (!query) return text;
+
+          const regex = new RegExp(`(${query})`, 'gi');
+          return text.replace(regex, '<mark>$1</mark>');
+        }
+      }
+
+      // Quick filter functionality - FIXED
+      function setupQuickFilters() {
+        const showAllButton = document.getElementById('showAllButton');
+        
+        document.querySelectorAll('.quick-filter-btn').forEach(button => {
+          button.addEventListener('click', async () => {
+            const category = button.getAttribute('data-category');
+            const discount = button.getAttribute('data-discount');
+
+            // Toggle active state
+            document.querySelectorAll('.quick-filter-btn').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            button.classList.add('active');
+
+            // Clear search input
+            currentSearchQuery = '';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+              searchInput.value = '';
+            }
+            hideSuggestions();
+
+            if (category) {
+              // Filter by category
+              document.getElementById('searchResultsInfo').style.display = 'block';
+              document.getElementById('resultsCount').textContent = `Showing ${category} products`;
+
+              // Show only the selected category section
+              document.querySelectorAll('.category-section').forEach(section => {
+                if (section.id.startsWith(category)) {
+                  section.style.display = 'block';
+                } else {
+                  section.style.display = 'none';
+                }
+              });
+
+              document.getElementById('viewMoreBtn').style.display = 'none';
+              
+              // Load products with category filter
+              await loadProducts('', category);
+              
+            } else if (discount) {
+              // Filter products with discount
+              document.getElementById('searchResultsInfo').style.display = 'block';
+              document.getElementById('resultsCount').textContent = 'Showing products on sale';
+
+              // Show all sections initially
+              document.querySelectorAll('.category-section').forEach(section => {
+                section.style.display = 'block';
+              });
+
+              document.getElementById('viewMoreBtn').style.display = 'none';
+
+              // Load discounted products
+              await loadProducts('', '', true);
+              
+            } else if (button === showAllButton) {
+              // Show all products
+              document.getElementById('searchResultsInfo').style.display = 'none';
+              document.getElementById('noSearchResults').style.display = 'none';
+
+              // Show all category sections
+              document.querySelectorAll('.category-section').forEach(section => {
+                section.style.display = 'block';
+              });
+
+              document.getElementById('viewMoreBtn').style.display = 'block';
+
+              // Load all products
+              await loadProducts();
+            }
+            
+            // Update URL for filters
+            updateURLForFilter(category, discount);
+          });
+        });
+      }
+
+      function updateURLForFilter(category, discount) {
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // Remove previous filter parameters
+        urlParams.delete('category');
+        urlParams.delete('search');
+        
+        if (category) {
+          urlParams.set('category', category);
+        } else if (discount) {
+          urlParams.set('filter', 'discount');
+        } else {
+          urlParams.delete('filter');
+        }
+        
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      function isFilterActive() {
+        const activeBtn = document.querySelector('.quick-filter-btn.active');
+        if (!activeBtn) return false;
+        return activeBtn.id !== 'showAllButton';
+      }
+
+      function updateURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        if (currentSearchQuery) {
+          urlParams.set('search', currentSearchQuery);
+        } else {
+          urlParams.delete('search');
+        }
+
+        const newUrl = `${window.location.pathname}?${urlParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      // View more button functionality
+      document.getElementById('viewMoreBtn').addEventListener('click', function () {
+        window.location.href = 'categories.html?showAll=true';
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
       });
 
       // Close suggestions when clicking outside
@@ -1320,6 +2133,7 @@
         }
       });
 
+<<<<<<< HEAD
       function performSearch() {
         const query = searchInput.value.trim();
         currentSearchQuery = query;
@@ -1346,6 +2160,16 @@
           }
           updateURL();
         }
+=======
+      // Load products with initial search if present
+      if (currentSearchQuery) {
+        loadProducts(currentSearchQuery);
+      } else if (category) {
+        // If category is in URL, filter by it
+        loadProducts('', category);
+      } else {
+        loadProducts();
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
       }
 
       function showSuggestions(suggestions, query) {
@@ -1406,6 +2230,7 @@
     document.getElementById('viewMoreBtn').addEventListener('click', function () {
       window.location.href = 'categories.html?showAll=true';
     });
+<<<<<<< HEAD
 
     // Initialize
     setupSearch();
@@ -1428,3 +2253,9 @@
 </script>
 </body>
 </html>
+=======
+  </script>
+</body>
+
+</html>
+>>>>>>> 5bfda3751e9508ccdfeae2a569ed6938dd898a84
