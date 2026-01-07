@@ -26,7 +26,10 @@
     "mongodb": "^5.9.2",
     "nodemailer": "^6.9.7",
     "rate-limit-mongo": "^2.3.2",
+<<<<<<< HEAD
     "uuid": "^13.0.0",
+=======
+>>>>>>> 4c2c73fdda59445e78de9e1d6a90595f26d1a939
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
