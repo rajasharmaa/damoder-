@@ -515,11 +515,12 @@ app.post('/api/auth/login', async (req, res) => {
       }
     }
     
+    // ✅ FIXED: Generate remember token if rememberMe is true
     let rememberToken = null;
     if (rememberMe === true) {
       rememberToken = generateRememberToken();
       const hashedRememberToken = hashToken(rememberToken);
-      const tokenExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000);
+      const tokenExpiry = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 days
       
       await usersCollection.updateOne(
         { _id: user._id },
@@ -530,6 +531,7 @@ app.post('/api/auth/login', async (req, res) => {
           } 
         }
       );
+      console.log('✅ Generated remember token for user:', user.email);
     }
     
     req.session.regenerate((err) => {
@@ -563,6 +565,7 @@ app.post('/api/auth/login', async (req, res) => {
           return handleError(res, saveErr, 'Session save');
         }
         
+        // ✅ FIXED: Return rememberToken in response
         const response = { 
           message: 'Login successful',
           user: {
@@ -577,6 +580,7 @@ app.post('/api/auth/login', async (req, res) => {
           response.rememberToken = rememberToken;
         }
         
+        console.log('✅ Login successful for user:', user.email);
         res.json(response);
       });
     });
@@ -590,7 +594,9 @@ app.get('/api/auth/status', async (req, res) => {
   try {
     const { rememberToken } = req.query;
     
+    // ✅ FIXED: Check remember token first
     if (rememberToken && typeof rememberToken === 'string' && rememberToken.length === 36) {
+      console.log('🔄 Checking auth status with remember token');
       const db = await connectToDB();
       const usersCollection = db.collection('users');
       
@@ -601,8 +607,11 @@ app.get('/api/auth/status', async (req, res) => {
       });
       
       if (user) {
+        console.log('✅ Valid remember token found for user:', user.email);
+        
         req.session.regenerate((err) => {
           if (err) {
+            console.error('❌ Session regeneration error:', err);
             return res.json({ authenticated: false });
           }
           
@@ -617,9 +626,11 @@ app.get('/api/auth/status', async (req, res) => {
           
           req.session.save((saveErr) => {
             if (saveErr) {
+              console.error('❌ Session save error:', saveErr);
               return res.json({ authenticated: false });
             }
             
+            console.log('✅ Auto-login via remember token successful');
             res.json({ 
               authenticated: true, 
               user: {
@@ -633,10 +644,14 @@ app.get('/api/auth/status', async (req, res) => {
           });
         });
         return;
+      } else {
+        console.log('❌ Invalid or expired remember token');
       }
     }
     
+    // Check regular session
     if (req.session.user) {
+      console.log('✅ User authenticated via session');
       res.json({ 
         authenticated: true, 
         user: {
@@ -647,12 +662,14 @@ app.get('/api/auth/status', async (req, res) => {
         }
       });
     } else {
+      console.log('❌ Not authenticated');
       res.json({ 
         authenticated: false,
         message: 'Not authenticated'
       });
     }
   } catch (err) {
+    console.error('❌ Auth status error:', err);
     res.json({ authenticated: false });
   }
 });
